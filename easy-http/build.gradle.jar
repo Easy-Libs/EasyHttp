@@ -1,0 +1,117 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+android {
+    compileSdkVersion 23
+    buildToolsVersion "23.0.3"
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 23
+        versionCode 1
+        versionName "1.0.1"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+}
+
+dependencies {
+    compile fileTree(dir: "libs", include: ["*.jar"])
+}
+
+def identifier = "com"
+def name = "easylibs"
+
+def groupId = "${identifier}.${name}"
+def artifactId = "easy-sqlite"
+def version = "1.0.1"
+
+def localReleaseDest = "${buildDir}/release/${version}"
+def nearFullPath = "${localReleaseDest}/${identifier}/${name}/${artifactId}"
+def fullPath = "${nearFullPath}/${version}"
+
+task androidJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+}
+
+task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
+    classifier = "javadoc"
+    from androidJavadocs.destinationDir
+}
+
+task androidSourcesJar(type: Jar) {
+    classifier = "sources"
+    from android.sourceSets.main.java.srcDirs
+}
+
+task makeJar(type: Copy) {
+    from("build/intermediates/bundles/release/")
+    into("${fullPath}/")
+    include("classes.jar")
+    rename("classes.jar", "${artifactId}-${version}.jar")
+
+    doLast {
+        println "- '${artifactId}-${version}.jar' has been built"
+    }
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.groupId = groupId
+        pom.artifactId = artifactId
+        pom.version = version
+
+        repository(url: "file://${localReleaseDest}")
+    }
+}
+
+task removeUnwantedFiles(type: Delete) {
+    delete fileTree(dir: "${nearFullPath}/", include: ["*.md5", "*.sha1", "*.aar"])
+    delete fileTree(dir: "${fullPath}/", include: ["*.md5", "*.sha1", "*.aar"])
+
+    doLast {
+        println "- Unwanted files have been removed in these folders:"
+        println "--- ${nearFullPath}"
+        println "--- ${fullPath}"
+    }
+}
+
+task zipRelease(type: Zip) {
+    from localReleaseDest
+    destinationDir buildDir
+    archiveName "${artifactId}-${version}.zip"
+
+    doLast {
+        println "- Release ${version} can be found at ${localReleaseDest}/"
+        println "- Release ${version} zipped can be found ${buildDir}/release-${version}.zip"
+    }
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives androidJavadocsJar
+}
+
+def buildAliases = [
+        'all': ['clean', 'build', 'makeJar', 'uploadArchives', 'removeUnwantedFiles', 'zipRelease']
+]
+
+def expandedTaskList = []
+
+gradle.startParameter.taskNames.each {
+    expandedTaskList << (buildAliases[it] ? buildAliases[it] : it)
+}
+
+gradle.startParameter.taskNames = expandedTaskList.flatten()
+
+println "Following tasks have been run: ${gradle.startParameter.taskNames}"
