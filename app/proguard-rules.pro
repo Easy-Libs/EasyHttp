@@ -1,8 +1,11 @@
+# To enable ProGuard in your project, edit project.properties
+# to define the proguard.config property as described in that file.
+#
 # Add project specific ProGuard rules here.
 # By default, the flags in this file are appended to flags specified
-# in C:\Users\sachin.gupta\AppData\Local\Android\sdk/tools/proguard/proguard-android.txt
-# You can edit the include path and order by changing the proguardFiles
-# directive in build.gradle.
+# in ${sdk.dir}/tools/proguard/proguard-android.txt
+# You can edit the include path and order by changing the ProGuard
+# include property in project.properties.
 #
 # For more details, see
 #   http://developer.android.com/guide/developing/tools/proguard.html
@@ -15,7 +18,5 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
-# 'org.apache.http.legacy' specific classes
--keep class org.apache.http.** { *; }
--dontwarn org.apache.http.**
--dontwarn android.net.**
+# pojo classes that will be serialized/deserialized over Gson
+-keep class com.easylibs.http.example.model.** { *; }

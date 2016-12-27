@@ -11,27 +11,20 @@ android {
         versionCode 1
         versionName "1.0"
     }
-    productFlavors {
-        dev {
-        }
-        qa {
-        }
-    }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt')
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
 
 dependencies {
-    devCompile project(path: ':easy-http-volley', configuration: 'debug')
+    debugCompile project(':easy-http-volley')
 
-//    qaCompile 'com.easylibs:easy-http-volley:1.0'
-    qaCompile 'com.android.volley:volley:1.0.0'
-    qaCompile 'com.easylibs:easy-http:1.0'
-    qaCompile 'com.google.code.gson:gson:2.4'
+    releaseCompile('com.easylibs:easy-http-volley:1.0.1@aar') {
+        transitive true
+    }
 
     compile 'com.android.support:appcompat-v7:24.2.1'
 }

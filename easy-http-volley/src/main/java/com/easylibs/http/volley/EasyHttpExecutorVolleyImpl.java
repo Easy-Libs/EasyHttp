@@ -97,6 +97,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         } catch (Exception e) {
             e.printStackTrace();
             EasyHttpResponse<T> response = new EasyHttpResponse<>();
+            response.setStatusCode(500); // TODO
             response.setException(e);
             return response;
         }
