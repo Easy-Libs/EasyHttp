@@ -8,7 +8,7 @@ import java.util.HashMap;
  * pojo class for data related to a service request which will be executed
  * by any network layer
  *
- * @author sachin.gupta
+ * @author easy.libs
  */
 public class EasyHttpRequest<T> {
 
@@ -19,7 +19,7 @@ public class EasyHttpRequest<T> {
     private Object postObject;
 
     private Class<T> responseType;
-    private int requestTimeOut;
+    private int socketTimeOutMs;
 
     private int eventCode;
     private Object requestData;
@@ -73,12 +73,12 @@ public class EasyHttpRequest<T> {
         this.responseType = responseType;
     }
 
-    public int getRequestTimeOut() {
-        return requestTimeOut;
+    public int getSocketTimeOutMs() {
+        return socketTimeOutMs;
     }
 
-    public void setRequestTimeOut(int requestTimeOut) {
-        this.requestTimeOut = requestTimeOut;
+    public void setSocketTimeOutMs(int socketTimeOutMs) {
+        this.socketTimeOutMs = socketTimeOutMs;
     }
 
     public int getEventCode() {
@@ -118,7 +118,6 @@ public class EasyHttpRequest<T> {
     public void onError(Exception pResponseError) {
         EasyHttpResponse easyHttpResponse = new EasyHttpResponse();
         easyHttpResponse.setEasyHttpRequest(this);
-        easyHttpResponse.setSuccess(false);
         easyHttpResponse.setException(pResponseError);
         getEventListener().onEvent(getEventCode(), easyHttpResponse);
     }

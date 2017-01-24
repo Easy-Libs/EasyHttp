@@ -1,7 +1,7 @@
 package com.easylibs.http;
 
 /**
- * Created by sachin.gupta on 03-11-2016.
+ * Created by easy.libs on 03-11-2016.
  */
 public interface EasyHttpExecutor {
 

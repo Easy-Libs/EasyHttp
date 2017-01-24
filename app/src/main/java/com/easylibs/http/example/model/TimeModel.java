@@ -1,7 +1,7 @@
 package com.easylibs.http.example.model;
 
 /**
- * Created by sachin.gupta on 04-11-2016.
+ * Created by easy.libs on 04-11-2016.
  */
 public class TimeModel {
 

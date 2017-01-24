@@ -36,20 +36,8 @@ class EasyJsonRequest<T> extends JsonRequest<EasyHttpResponse<T>> {
 
     @Override
     protected Response<EasyHttpResponse<T>> parseNetworkResponse(NetworkResponse pNetworkResponse) {
-        EasyHttpResponse<T> easyHttpResponse = new EasyHttpResponse<>();
-        easyHttpResponse.setEasyHttpRequest(mEasyHttpRequest);
-        T parsedResponse = null;
         if (pNetworkResponse != null) {
-            easyHttpResponse.setStatusCode(pNetworkResponse.statusCode);
-            easyHttpResponse.setHeaders(pNetworkResponse.headers);
-            if (pNetworkResponse.data != null) {
-                String responseStr = new String(pNetworkResponse.data);
-                parsedResponse = JsonUtils.objectify(responseStr, mEasyHttpRequest.getResponseType());
-            }
-        }
-        if (parsedResponse != null) {
-            easyHttpResponse.setSuccess(true);
-            easyHttpResponse.setData(parsedResponse);
+            EasyHttpResponse<T> easyHttpResponse = EasyVolleyUtils.createEasyHttpResponse(mEasyHttpRequest, pNetworkResponse);
             return Response.success(easyHttpResponse, null);
         } else {
             return Response.error(new VolleyError(pNetworkResponse));

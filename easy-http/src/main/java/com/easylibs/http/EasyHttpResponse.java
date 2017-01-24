@@ -10,11 +10,6 @@ public class EasyHttpResponse<T> {
     private EasyHttpRequest easyHttpRequest;
 
     /**
-     * true if network layer has successfully fetched the requested data
-     */
-    private boolean isSuccess;
-
-    /**
      * response after parsing, may be of any custom class
      */
     private T data;
@@ -37,20 +32,6 @@ public class EasyHttpResponse<T> {
 
     public void setEasyHttpRequest(EasyHttpRequest easyHttpRequest) {
         this.easyHttpRequest = easyHttpRequest;
-    }
-
-    /**
-     * @return the isSuccess
-     */
-    public boolean isSuccess() {
-        return isSuccess;
-    }
-
-    /**
-     * @param isSuccess the isSuccess to set
-     */
-    public void setSuccess(boolean isSuccess) {
-        this.isSuccess = isSuccess;
     }
 
     public T getData() {

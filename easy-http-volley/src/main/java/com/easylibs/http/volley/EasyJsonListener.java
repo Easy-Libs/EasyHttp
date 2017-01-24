@@ -13,9 +13,9 @@ import com.easylibs.http.EasyHttpResponse;
  */
 class EasyJsonListener<T> implements Listener<EasyHttpResponse<T>>, ErrorListener {
 
-    private EasyHttpRequest mEasyHttpRequest;
+    private EasyHttpRequest<T> mEasyHttpRequest;
 
-    EasyJsonListener(EasyHttpRequest pEasyHttpRequest) {
+    EasyJsonListener(EasyHttpRequest<T> pEasyHttpRequest) {
         mEasyHttpRequest = pEasyHttpRequest;
     }
 
@@ -26,6 +26,12 @@ class EasyJsonListener<T> implements Listener<EasyHttpResponse<T>>, ErrorListene
 
     @Override
     public void onErrorResponse(VolleyError pResponseError) {
-        mEasyHttpRequest.onError(pResponseError);
+        if (pResponseError.networkResponse != null) {
+            EasyHttpResponse<T> response = EasyVolleyUtils.createEasyHttpResponse(mEasyHttpRequest, pResponseError.networkResponse);
+            response.setException(pResponseError);
+            mEasyHttpRequest.onResponse(response);
+        } else {
+            mEasyHttpRequest.onError(pResponseError);
+        }
     }
 }

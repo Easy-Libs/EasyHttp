@@ -23,7 +23,6 @@ class EasyStringListener implements Listener<String>, ErrorListener {
     public void onResponse(String pResponse) {
         EasyHttpResponse<String> easyHttpResponse = new EasyHttpResponse<>();
         easyHttpResponse.setEasyHttpRequest(mEasyHttpRequest);
-        easyHttpResponse.setSuccess(true);
         easyHttpResponse.setData(pResponse);
         mEasyHttpRequest.onResponse(easyHttpResponse);
     }

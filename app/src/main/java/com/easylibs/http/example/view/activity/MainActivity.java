@@ -3,6 +3,7 @@ package com.easylibs.http.example.view.activity;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 
 import com.easylibs.http.EasyHttpResponse;
 import com.easylibs.http.example.Constants;
@@ -11,7 +12,7 @@ import com.easylibs.http.example.controller.ApisController;
 import com.easylibs.http.example.model.TimeModel;
 import com.easylibs.listener.EventListener;
 
-public class MainActivity extends AppCompatActivity implements EventListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, EventListener {
 
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
@@ -20,22 +21,38 @@ public class MainActivity extends AppCompatActivity implements EventListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        ApisController.getTimeString(this, this);
+        findViewById(R.id.btn_async_string).setOnClickListener(this);
+        findViewById(R.id.btn_async_json).setOnClickListener(this);
+        findViewById(R.id.btn_sync_json).setOnClickListener(this);
+    }
 
-        ApisController.getTimeModel(this, this);
-
-        new Thread() {
-            @Override
-            public void run() {
-                EasyHttpResponse<TimeModel> response = ApisController.getTimeModelSync(MainActivity.this);
-                if (response.isSuccess()) {
-                    Log.d(LOG_TAG, response.getData().getDateString());
-                } else {
-                    Log.d(LOG_TAG, "StatusCode: " + response.getStatusCode());
-                }
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.btn_async_string: {
+                ApisController.getTimeString(this, this);
+                break;
             }
-        }.start();
+            case R.id.btn_async_json: {
+                ApisController.getTimeModel(this, this);
+                break;
+            }
+            case R.id.btn_sync_json: {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        EasyHttpResponse<TimeModel> response = ApisController.getTimeModelSync(MainActivity.this);
+                        if (response.getData() != null) {
+                            Log.d(LOG_TAG, "Response: " + response.getData().getDateString());
+                        } else {
+                            Log.d(LOG_TAG, "StatusCode: " + response.getStatusCode());
+                        }
+                    }
+                }.start();
+                break;
+            }
 
+        }
     }
 
     @Override
@@ -43,18 +60,17 @@ public class MainActivity extends AppCompatActivity implements EventListener {
         switch (pEventCode) {
             case Constants.EVENT_CODE_GET_TIME: {
                 EasyHttpResponse response = (EasyHttpResponse) pEventData;
-                if (response.isSuccess()) {
-                    Log.d(LOG_TAG, response.getData().toString());
+                if (response.getData() != null) {
+                    Log.d(LOG_TAG, "Response: " + response.getData().toString());
                 } else {
                     Log.d(LOG_TAG, "StatusCode: " + response.getStatusCode());
                 }
                 break;
             }
             case Constants.EVENT_CODE_GET_TIME_JSON: {
-                EasyHttpResponse response = (EasyHttpResponse) pEventData;
-                TimeModel model = (TimeModel) response.getData();
-                if (response.isSuccess()) {
-                    Log.d(LOG_TAG, model.getDateString());
+                EasyHttpResponse<TimeModel> response = (EasyHttpResponse) pEventData;
+                if (response.getData() != null) {
+                    Log.d(LOG_TAG, "Response: " + response.getData().getDateString());
                 } else {
                     Log.d(LOG_TAG, "StatusCode: " + response.getStatusCode());
                 }

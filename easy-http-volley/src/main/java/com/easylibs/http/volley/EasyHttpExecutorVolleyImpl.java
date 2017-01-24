@@ -58,6 +58,8 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
             EasyJsonListener<T> listener = new EasyJsonListener<>(pRequest);
             volleyRequest = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, listener, listener);
         }
+        volleyRequest.setRetryPolicy(new EasyRetryPolicy(pRequest));
+
         // TODO - get request specific tag
         volleyRequest.setTag(mDefaultRequestTag);
 
@@ -146,7 +148,6 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
             easyResponse.setStatusCode(httpResponse.getStatusLine().getStatusCode());
             BufferedHttpEntity bufferedEntity = new BufferedHttpEntity(httpResponse.getEntity());
             easyResponse.setData(bufferedEntity.getContent());
-            easyResponse.setSuccess(true);
         } catch (Exception e) {
             easyResponse.setException(e);
             e.printStackTrace();
