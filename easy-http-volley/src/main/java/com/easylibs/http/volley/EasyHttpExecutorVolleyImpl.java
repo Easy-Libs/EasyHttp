@@ -49,15 +49,8 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
             Log.v(LOG_TAG, "executeAsync URL: " + pRequest.getUrl());
         }
         int volleyHttpMethod = getVolleyHttpMethod(pRequest.getHttpMethod());
-        Request volleyRequest;
-
-        if (pRequest.getResponseType() == String.class) {
-            EasyStringListener listener = new EasyStringListener(pRequest);
-            volleyRequest = new EasyStringRequest(volleyHttpMethod, pRequest.getUrl(), listener, pRequest.getHeaders(), pRequest.getPostParams());
-        } else {
-            EasyJsonListener<T> listener = new EasyJsonListener<>(pRequest);
-            volleyRequest = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, listener, listener);
-        }
+        EasyJsonListener<T> listener = new EasyJsonListener<>(pRequest);
+        Request<EasyHttpResponse<T>> volleyRequest = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, listener, listener);
         volleyRequest.setRetryPolicy(new EasyRetryPolicy(pRequest));
 
         // TODO - get request specific tag
@@ -91,7 +84,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
 
         int volleyHttpMethod = getVolleyHttpMethod(pRequest.getHttpMethod());
         RequestFuture<EasyHttpResponse<T>> future = RequestFuture.newFuture();
-        Request volleyRq = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, future, future);
+        Request<EasyHttpResponse<T>> volleyRq = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, future, future);
         mRequestQueue.add(volleyRq);
 
         try {
@@ -106,27 +99,11 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
     }
 
     /**
-     * Cancels all pending requests by the specified pRequestTag, it is important to
-     * specify a pRequestTag so that the pending/ongoing requests can be cancelled.
-     *
-     * @param pRequestTag
-     */
-    public synchronized void cancelPendingRequests(Object pRequestTag) {
-        if (pRequestTag == null) {
-            pRequestTag = mDefaultRequestTag;
-        }
-        if (mRequestQueue != null) {
-            mRequestQueue.cancelAll(pRequestTag);
-        }
-    }
-
-    /**
      * @param pRequest
      * @return
      */
     private EasyHttpResponse getStreamResponse(EasyHttpRequest pRequest) {
-        EasyHttpResponse easyResponse = new EasyHttpResponse();
-        easyResponse.setEasyHttpRequest(pRequest);
+        EasyHttpResponse<InputStream> easyResponse = new EasyHttpResponse<>();
 
         HttpResponse httpResponse = null;
         try {
@@ -143,11 +120,12 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
                     break;
                 }
             }
-            // TODO - headers
+            // TODO - add request headers
             httpResponse = client.execute(request);
             easyResponse.setStatusCode(httpResponse.getStatusLine().getStatusCode());
             BufferedHttpEntity bufferedEntity = new BufferedHttpEntity(httpResponse.getEntity());
             easyResponse.setData(bufferedEntity.getContent());
+            // TODO - response headers
         } catch (Exception e) {
             easyResponse.setException(e);
             e.printStackTrace();

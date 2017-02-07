@@ -7,40 +7,30 @@ import java.util.Map;
  */
 public class EasyHttpResponse<T> {
 
-    private EasyHttpRequest easyHttpRequest;
+    /**
+     * HTTP Status Code
+     */
+    private int statusCode;
+
+    /**
+     * HTTP response headers
+     */
+    private Map<String, String> headers;
 
     /**
      * response after parsing, may be of any custom class
      */
     private T data;
-    /**
-     * response headers
-     */
-    private int statusCode;
-    /**
-     * response headers
-     */
-    private Map<String, String> headers;
+
     /**
      * exception, if occurred while fetching the response
      */
     private Exception exception;
 
-    public EasyHttpRequest getEasyHttpRequest() {
-        return easyHttpRequest;
-    }
-
-    public void setEasyHttpRequest(EasyHttpRequest easyHttpRequest) {
-        this.easyHttpRequest = easyHttpRequest;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
+    /**
+     * request for which this response is, will be null in case of sync requests
+     */
+    private EasyHttpRequest easyHttpRequest;
 
     /**
      * @return the statusCode
@@ -71,6 +61,20 @@ public class EasyHttpResponse<T> {
     }
 
     /**
+     * @return parsed data
+     */
+    public T getData() {
+        return data;
+    }
+
+    /**
+     * @param data parsed data to set
+     */
+    public void setData(T data) {
+        this.data = data;
+    }
+
+    /**
      * @return the exception
      */
     public Exception getException() {
@@ -82,5 +86,19 @@ public class EasyHttpResponse<T> {
      */
     public void setException(Exception exception) {
         this.exception = exception;
+    }
+
+    /**
+     * @param easyHttpRequest the easyHttpRequest to set
+     */
+    void setEasyHttpRequest(EasyHttpRequest easyHttpRequest) {
+        this.easyHttpRequest = easyHttpRequest;
+    }
+
+    /**
+     * @return request for which this response is, will be null in case of sync requests
+     */
+    public EasyHttpRequest getEasyHttpRequest() {
+        return easyHttpRequest;
     }
 }
