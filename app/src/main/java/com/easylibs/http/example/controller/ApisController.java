@@ -10,7 +10,7 @@ import com.easylibs.http.example.model.ReverseGeoResponse;
 import com.easylibs.listener.EventListener;
 
 /**
- * Created by sachin.gupta on 03-11-2016.
+ * Created by easy.libs on 03-11-2016.
  */
 public class ApisController {
 
@@ -18,6 +18,7 @@ public class ApisController {
 
         EasyHttpRequest<ReverseGeoResponse> request = new EasyHttpRequest<>();
 
+        request.setContext(pContext);
         request.setHttpMethod(EasyHttpRequest.Method.GET);
         request.setEventCode(pEventCode);
         request.setUrl(Constants.URL_GEO_CODE);
@@ -31,6 +32,7 @@ public class ApisController {
 
         EasyHttpRequest<ReverseGeoResponse> request = new EasyHttpRequest<>();
 
+        request.setContext(pContext);
         request.setHttpMethod(EasyHttpRequest.Method.GET);
         request.setUrl(Constants.URL_GEO_CODE);
         request.setResponseType(ReverseGeoResponse.class);

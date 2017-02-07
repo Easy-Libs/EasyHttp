@@ -1,9 +1,9 @@
 package com.easylibs.http.volley;
 
+import android.app.Activity;
 import android.content.Context;
 import android.util.Log;
 
-import com.android.volley.Network;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.BasicNetwork;
@@ -29,18 +29,28 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
 
     private static final String LOG_TAG = EasyHttpExecutorVolleyImpl.class.getSimpleName();
 
-    private String mDefaultRequestTag;
-    private RequestQueue mRequestQueue;
+    private RequestQueue mBackgroundRequestsQueue;
+    private RequestQueue mForegroundRequestsQueue;
 
     private EasyHttpExecutorVolleyImpl(Context pContext) {
 
-        mDefaultRequestTag = pContext.getPackageName();
-
         // TODO - same cache should be accessible by other network layers
         File cacheDir = new File(pContext.getCacheDir(), "networkCache");
-        Network network = new BasicNetwork(new HurlStack());
-        mRequestQueue = new RequestQueue(new DiskBasedCache(cacheDir), network);
-        mRequestQueue.start();
+        DiskBasedCache diskBasedCache = new DiskBasedCache(cacheDir);
+        BasicNetwork network = new BasicNetwork(new HurlStack());
+
+        mBackgroundRequestsQueue = new RequestQueue(diskBasedCache, network);
+        mBackgroundRequestsQueue.start();
+
+        mForegroundRequestsQueue = new RequestQueue(diskBasedCache, network);
+        mForegroundRequestsQueue.start();
+    }
+
+    private RequestQueue getQueue(Context pContext) {
+        if (pContext instanceof Activity) {
+            return mForegroundRequestsQueue;
+        }
+        return mBackgroundRequestsQueue;
     }
 
     @Override
@@ -53,10 +63,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         Request<EasyHttpResponse<T>> volleyRequest = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, listener, listener);
         volleyRequest.setRetryPolicy(new EasyRetryPolicy(pRequest));
 
-        // TODO - get request specific tag
-        volleyRequest.setTag(mDefaultRequestTag);
-
-        mRequestQueue.add(volleyRequest);
+        getQueue(pRequest.getContext()).add(volleyRequest);
     }
 
     private int getVolleyHttpMethod(int httpMethod) {
@@ -85,9 +92,11 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         int volleyHttpMethod = getVolleyHttpMethod(pRequest.getHttpMethod());
         RequestFuture<EasyHttpResponse<T>> future = RequestFuture.newFuture();
         Request<EasyHttpResponse<T>> volleyRq = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, future, future);
-        mRequestQueue.add(volleyRq);
+        // TODO - retry policy
+        getQueue(pRequest.getContext()).add(volleyRq);
 
         try {
+            // TODO - timeout?
             return future.get();
         } catch (Exception e) {
             e.printStackTrace();
@@ -105,7 +114,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
     private EasyHttpResponse getStreamResponse(EasyHttpRequest pRequest) {
         EasyHttpResponse<InputStream> easyResponse = new EasyHttpResponse<>();
 
-        HttpResponse httpResponse = null;
+        HttpResponse httpResponse;
         try {
             HttpClient client = new DefaultHttpClient();
             HttpUriRequest request;

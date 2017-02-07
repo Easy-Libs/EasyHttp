@@ -1,7 +1,10 @@
 package com.easylibs.http;
 
+import android.content.Context;
+
 import com.easylibs.listener.EventListener;
 
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 /**
@@ -12,18 +15,26 @@ import java.util.HashMap;
  */
 public class EasyHttpRequest<T> {
 
+    private WeakReference<Context> contextWeakRef;
+
     private int httpMethod;
     private String url;
     private HashMap<String, String> headers;
-    private HashMap<String, String> postParams;
     private Object postObject;
 
     private Class<T> responseType;
     private int socketTimeOutMs;
 
+    private WeakReference<EventListener> eventListenerWeakRef;
     private int eventCode;
-    private Object requestData;
-    private EventListener eventListener;
+
+    public Context getContext() {
+        return contextWeakRef == null ? null : contextWeakRef.get();
+    }
+
+    public void setContext(Context context) {
+        this.contextWeakRef = new WeakReference<>(context);
+    }
 
     public int getHttpMethod() {
         return httpMethod;
@@ -47,14 +58,6 @@ public class EasyHttpRequest<T> {
 
     public void setHeaders(HashMap<String, String> headers) {
         this.headers = headers;
-    }
-
-    public HashMap<String, String> getPostParams() {
-        return postParams;
-    }
-
-    public void setPostParams(HashMap<String, String> postParams) {
-        this.postParams = postParams;
     }
 
     public Object getPostObject() {
@@ -81,45 +84,26 @@ public class EasyHttpRequest<T> {
         this.socketTimeOutMs = socketTimeOutMs;
     }
 
-    public int getEventCode() {
-        return eventCode;
-    }
-
     public void setEventCode(int eventCode) {
         this.eventCode = eventCode;
     }
 
-    public Object getRequestData() {
-        return requestData;
-    }
-
-    public void setRequestData(Object requestData) {
-        this.requestData = requestData;
-    }
-
-    public EventListener getEventListener() {
-        return eventListener;
-    }
-
     public void setEventListener(EventListener eventListener) {
-        this.eventListener = eventListener;
+        this.eventListenerWeakRef = new WeakReference<>(eventListener);
     }
 
     /**
      * @param pEasyHttpResponse
      */
     public <T> void onResponse(EasyHttpResponse<T> pEasyHttpResponse) {
-        getEventListener().onEvent(getEventCode(), pEasyHttpResponse);
-    }
-
-    /**
-     * @param pResponseError
-     */
-    public void onError(Exception pResponseError) {
-        EasyHttpResponse easyHttpResponse = new EasyHttpResponse();
-        easyHttpResponse.setEasyHttpRequest(this);
-        easyHttpResponse.setException(pResponseError);
-        getEventListener().onEvent(getEventCode(), easyHttpResponse);
+        if (eventListenerWeakRef == null) {
+            return;
+        }
+        EventListener listener = eventListenerWeakRef.get();
+        if (listener != null) {
+            pEasyHttpResponse.setEasyHttpRequest(this);
+            listener.onEvent(eventCode, pEasyHttpResponse);
+        }
     }
 
     /**
