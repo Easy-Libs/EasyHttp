@@ -9,7 +9,7 @@ import com.easylibs.http.EasyHttpResponse;
 /**
  * connector between response handling of Volley and our network layer
  *
- * @author sachin.gupta
+ * @author easy.libs
  */
 class EasyJsonListener<T> implements Listener<EasyHttpResponse<T>>, ErrorListener {
 
@@ -26,12 +26,7 @@ class EasyJsonListener<T> implements Listener<EasyHttpResponse<T>>, ErrorListene
 
     @Override
     public void onErrorResponse(VolleyError pResponseError) {
-        if (pResponseError.networkResponse != null) {
-            EasyHttpResponse<T> response = EasyVolleyUtils.createEasyHttpResponse(mEasyHttpRequest, pResponseError.networkResponse);
-            response.setException(pResponseError);
-            mEasyHttpRequest.onResponse(response);
-        } else {
-            mEasyHttpRequest.onError(pResponseError);
-        }
+        EasyHttpResponse<T> response = EasyVolleyUtils.createEasyHttpResponse(pResponseError);
+        mEasyHttpRequest.onResponse(response);
     }
 }

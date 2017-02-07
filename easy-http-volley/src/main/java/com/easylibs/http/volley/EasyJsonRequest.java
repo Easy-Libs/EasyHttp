@@ -4,6 +4,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonRequest;
 import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpRequest;
@@ -38,9 +39,14 @@ class EasyJsonRequest<T> extends JsonRequest<EasyHttpResponse<T>> {
     protected Response<EasyHttpResponse<T>> parseNetworkResponse(NetworkResponse pNetworkResponse) {
         if (pNetworkResponse != null) {
             EasyHttpResponse<T> easyHttpResponse = EasyVolleyUtils.createEasyHttpResponse(mEasyHttpRequest, pNetworkResponse);
-            return Response.success(easyHttpResponse, null);
+            return Response.success(easyHttpResponse, HttpHeaderParser.parseCacheHeaders(pNetworkResponse));
         } else {
             return Response.error(new VolleyError(pNetworkResponse));
         }
+    }
+
+    @Override
+    protected VolleyError parseNetworkError(VolleyError volleyError) {
+        return EasyVolleyError.newInstance(mEasyHttpRequest, volleyError);
     }
 }

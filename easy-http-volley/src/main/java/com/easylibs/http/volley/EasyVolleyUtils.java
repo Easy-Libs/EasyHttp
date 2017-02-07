@@ -1,34 +1,68 @@
 package com.easylibs.http.volley;
 
 import com.android.volley.NetworkResponse;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
 import com.easylibs.utils.JsonUtils;
 
 /**
- * Created by root on 19/1/17.
+ * Created by easy.libs on 19/1/17.
  */
-
 public class EasyVolleyUtils {
 
     /**
+     * @param <T>
      * @param pEasyHttpRequest
      * @param pNetworkResponse
-     * @param <T>
      * @return
      */
     static <T> EasyHttpResponse<T> createEasyHttpResponse(EasyHttpRequest<T> pEasyHttpRequest, NetworkResponse pNetworkResponse) {
+        EasyHttpResponse<T> easyHttpResponse = createEasyHttpResponse(pNetworkResponse);
+        if (pNetworkResponse != null && pNetworkResponse.data != null) {
+            String dataStr;
+            try {
+                dataStr = new String(pNetworkResponse.data, HttpHeaderParser.parseCharset(pNetworkResponse.headers));
+            } catch (Exception e) {
+                dataStr = new String(pNetworkResponse.data);
+            }
+            T parsedData = JsonUtils.objectify(dataStr, pEasyHttpRequest.getResponseType());
+            easyHttpResponse.setData(parsedData);
+        }
+        return easyHttpResponse;
+    }
+
+    /**
+     * @param pNetworkResponse
+     * @return
+     */
+    private static <T> EasyHttpResponse<T> createEasyHttpResponse(NetworkResponse pNetworkResponse) {
         EasyHttpResponse<T> easyHttpResponse = new EasyHttpResponse<>();
-        easyHttpResponse.setEasyHttpRequest(pEasyHttpRequest);
         if (pNetworkResponse == null) {
             return easyHttpResponse;
         }
         easyHttpResponse.setStatusCode(pNetworkResponse.statusCode);
         easyHttpResponse.setHeaders(pNetworkResponse.headers);
-        if (pNetworkResponse.data != null) {
-            String responseStr = new String(pNetworkResponse.data);
-            T parsedResponse = JsonUtils.objectify(responseStr, pEasyHttpRequest.getResponseType());
-            easyHttpResponse.setData(parsedResponse);
+        return easyHttpResponse;
+    }
+
+    /**
+     * @param <T>
+     * @param pVolleyError
+     * @return
+     */
+    static <T> EasyHttpResponse<T> createEasyHttpResponse(VolleyError pVolleyError) {
+        EasyHttpResponse easyHttpResponse;
+        if (pVolleyError == null || pVolleyError.networkResponse == null) {
+            easyHttpResponse = new EasyHttpResponse<>();
+        } else {
+            easyHttpResponse = createEasyHttpResponse(pVolleyError.networkResponse);
+        }
+        easyHttpResponse.setException(pVolleyError);
+        if (pVolleyError instanceof EasyVolleyError) {
+            EasyVolleyError evError = (EasyVolleyError) pVolleyError;
+            easyHttpResponse.setData(evError.getParsedData());
         }
         return easyHttpResponse;
     }
