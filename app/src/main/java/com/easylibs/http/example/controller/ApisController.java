@@ -6,7 +6,7 @@ import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
 import com.easylibs.http.example.Constants;
-import com.easylibs.http.example.model.TimeModel;
+import com.easylibs.http.example.model.ReverseGeoResponse;
 import com.easylibs.listener.EventListener;
 
 /**
@@ -14,43 +14,26 @@ import com.easylibs.listener.EventListener;
  */
 public class ApisController {
 
-    public static EasyHttpRequest<String> getTimeString(Context pContext, EventListener pEventListener) {
+    public static void getPlaceAsync(Context pContext, EventListener pEventListener, int pEventCode) {
 
-        EasyHttpRequest<String> request = new EasyHttpRequest<>();
+        EasyHttpRequest<ReverseGeoResponse> request = new EasyHttpRequest<>();
 
         request.setHttpMethod(EasyHttpRequest.Method.GET);
-        request.setEventCode(Constants.EVENT_CODE_GET_TIME);
-        request.setUrl(Constants.URL_GET_TIME);
+        request.setEventCode(pEventCode);
+        request.setUrl(Constants.URL_GEO_CODE);
         request.setEventListener(pEventListener);
-        request.setResponseType(String.class);
+        request.setResponseType(ReverseGeoResponse.class);
 
         EasyHttp.getExecutor(pContext).executeAsync(request);
-
-        return request;
     }
 
-    public static EasyHttpRequest<TimeModel> getTimeModel(Context pContext, EventListener pEventListener) {
+    public static EasyHttpResponse<ReverseGeoResponse> getPlaceSync(Context pContext) {
 
-        EasyHttpRequest<TimeModel> request = new EasyHttpRequest<>();
-
-        request.setHttpMethod(EasyHttpRequest.Method.GET);
-        request.setEventCode(Constants.EVENT_CODE_GET_TIME_JSON);
-        request.setUrl(Constants.URL_GET_TIME_JSON);
-        request.setEventListener(pEventListener);
-        request.setResponseType(TimeModel.class);
-
-        EasyHttp.getExecutor(pContext).executeAsync(request);
-
-        return request;
-    }
-
-    public static EasyHttpResponse<TimeModel> getTimeModelSync(Context pContext) {
-
-        EasyHttpRequest<TimeModel> request = new EasyHttpRequest<>();
+        EasyHttpRequest<ReverseGeoResponse> request = new EasyHttpRequest<>();
 
         request.setHttpMethod(EasyHttpRequest.Method.GET);
-        request.setUrl(Constants.URL_GET_TIME_JSON);
-        request.setResponseType(TimeModel.class);
+        request.setUrl(Constants.URL_GEO_CODE);
+        request.setResponseType(ReverseGeoResponse.class);
 
         return EasyHttp.getExecutor(pContext).executeSync(request);
     }
