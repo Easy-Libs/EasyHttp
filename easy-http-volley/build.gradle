@@ -9,8 +9,8 @@ android {
     defaultConfig {
         minSdkVersion 11
         targetSdkVersion 23
-        versionCode 3
-        versionName "1.0.2"
+        versionCode 4
+        versionName "1.0.3"
 
         consumerProguardFiles 'proguard-rules.pro'
     }
@@ -23,8 +23,7 @@ android {
 }
 
 dependencies {
-//    compile project(':easy-http')
-    compile('com.easylibs:easy-http:1.0.2@aar') {
+    compile('com.easylibs:easy-http:1.0.3@aar') {
         transitive = true
     }
     compile('com.android.volley:volley:1.0.0') {
@@ -32,29 +31,29 @@ dependencies {
     }
 }
 
-//ext {
-//    bintrayRepo = 'maven'
-//    bintrayName = 'easy-http-volley'
-//
-//    publishedGroupId = 'com.easylibs'
-//    libraryName = 'Easy Http - Volley'
-//    artifact = 'easy-http-volley'
-//
-//    libraryVersion = '1.0.2'
-//    libraryDescription = 'A set of classes to connect volley with easy-http'
-//
-//    siteUrl = 'https://github.com/Easy-Libs'
-//    gitUrl = 'https://github.com/Easy-Libs'
-//
-//    developerId = 'easy-libs'
-//    developerName = 'Easy Libs'
-//    developerEmail = 'easy.libraries@gmail.com'
-//
-//    licenseName = 'The Apache Software License, Version 2.0'
-//    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-//    allLicenses = ["Apache-2.0"]
-//}
-//
-//// Place it at the end of the file
-//apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-//apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'easy-http-volley'
+
+    publishedGroupId = 'com.easylibs'
+    libraryName = 'Easy Http - Volley'
+    artifact = 'easy-http-volley'
+
+    libraryVersion = '1.0.3'
+    libraryDescription = 'A set of classes to connect volley with easy-http'
+
+    siteUrl = 'https://github.com/Easy-Libs'
+    gitUrl = 'https://github.com/Easy-Libs'
+
+    developerId = 'easy-libs'
+    developerName = 'Easy Libs'
+    developerEmail = 'easy.libraries@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
+// Place it at the end of the file
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

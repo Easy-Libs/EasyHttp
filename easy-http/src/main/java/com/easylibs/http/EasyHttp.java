@@ -12,7 +12,12 @@ import java.util.Map;
  */
 public class EasyHttp {
 
-    private static final String LOG_TAG = EasyHttp.class.getSimpleName();
+    /**
+     * max length for a valid LOG_TAG is 23 characters.
+     */
+    public static String LOG_TAG = EasyHttp.class.getSimpleName();
+
+    public static boolean DEBUG = BuildConfig.DEBUG;
 
     private static EasyHttpExecutor sInstance;
 

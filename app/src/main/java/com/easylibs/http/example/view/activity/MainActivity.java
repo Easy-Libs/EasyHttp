@@ -5,7 +5,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpResponse;
+import com.easylibs.http.example.BuildConfig;
 import com.easylibs.http.example.Constants;
 import com.easylibs.http.example.R;
 import com.easylibs.http.example.controller.ApisController;
@@ -20,6 +22,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        EasyHttp.DEBUG = BuildConfig.DEBUG;
+        EasyHttp.LOG_TAG = getString(R.string.app_name);
 
         findViewById(R.id.btn_async_json).setOnClickListener(this);
         findViewById(R.id.btn_sync_json).setOnClickListener(this);

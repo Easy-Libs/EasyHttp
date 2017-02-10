@@ -1,8 +1,11 @@
 package com.easylibs.http.volley;
 
+import android.util.Log;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
+import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.utils.JsonUtils;
 
@@ -45,6 +48,9 @@ class EasyVolleyError extends VolleyError {
                     dataStr = new String(evError.networkResponse.data, HttpHeaderParser.parseCharset(evError.networkResponse.headers));
                 } catch (Exception e) {
                     dataStr = new String(evError.networkResponse.data);
+                }
+                if (EasyHttp.DEBUG) {
+                    Log.e(EasyHttp.LOG_TAG, "Response Data: " + dataStr);
                 }
                 T parsedData = JsonUtils.objectify(dataStr, pEasyHttpRequest.getResponseType());
                 evError.setParsedData(parsedData);

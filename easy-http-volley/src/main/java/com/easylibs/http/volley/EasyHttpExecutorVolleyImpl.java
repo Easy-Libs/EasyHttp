@@ -10,6 +10,7 @@ import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
 import com.android.volley.toolbox.RequestFuture;
+import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpExecutor;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
@@ -21,6 +22,8 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
 
 import java.io.File;
 import java.io.InputStream;
@@ -55,13 +58,14 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
 
     @Override
     public <T> void executeAsync(EasyHttpRequest<T> pRequest) {
-        if (BuildConfig.DEBUG) {
-            Log.v(LOG_TAG, "executeAsync URL: " + pRequest.getUrl());
+        if (EasyHttp.DEBUG) {
+            Log.d(EasyHttp.LOG_TAG, "executeAsync URL: " + pRequest.getUrl());
         }
         int volleyHttpMethod = getVolleyHttpMethod(pRequest.getHttpMethod());
         EasyJsonListener<T> listener = new EasyJsonListener<>(pRequest);
         Request<EasyHttpResponse<T>> volleyRequest = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, listener, listener);
         volleyRequest.setRetryPolicy(new EasyRetryPolicy(pRequest));
+        volleyRequest.setShouldCache(pRequest.getCacheTtl() >= 0);
 
         getQueue(pRequest.getContext()).add(volleyRequest);
     }
@@ -82,8 +86,8 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
 
     @Override
     public <T> EasyHttpResponse<T> executeSync(final EasyHttpRequest<T> pRequest) {
-        if (BuildConfig.DEBUG) {
-            Log.v(LOG_TAG, "executeSync URL: " + pRequest.getUrl());
+        if (EasyHttp.DEBUG) {
+            Log.d(EasyHttp.LOG_TAG, "executeSync URL: " + pRequest.getUrl());
         }
         if (pRequest.getResponseType() == InputStream.class) {
             return getStreamResponse(pRequest);
@@ -91,15 +95,16 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
 
         int volleyHttpMethod = getVolleyHttpMethod(pRequest.getHttpMethod());
         RequestFuture<EasyHttpResponse<T>> future = RequestFuture.newFuture();
-        Request<EasyHttpResponse<T>> volleyRq = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, future, future);
+        Request<EasyHttpResponse<T>> volleyRequest = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, future, future);
+        volleyRequest.setShouldCache(pRequest.getCacheTtl() >= 0);
         // TODO - retry policy
-        getQueue(pRequest.getContext()).add(volleyRq);
+        getQueue(pRequest.getContext()).add(volleyRequest);
 
         try {
             // TODO - timeout?
             return future.get();
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.e(EasyHttp.LOG_TAG, "executeSync", e);
             EasyHttpResponse<T> response = new EasyHttpResponse<>();
             response.setStatusCode(500); // TODO
             response.setException(e);
@@ -117,6 +122,11 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         HttpResponse httpResponse;
         try {
             HttpClient client = new DefaultHttpClient();
+            if (pRequest.getSocketTimeOutMs() > 0) {
+                HttpParams params = client.getParams();
+                HttpConnectionParams.setConnectionTimeout(params, pRequest.getSocketTimeOutMs());
+                HttpConnectionParams.setSoTimeout(params, pRequest.getSocketTimeOutMs());
+            }
             HttpUriRequest request;
             switch (pRequest.getHttpMethod()) {
                 case EasyHttpRequest.Method.POST: {

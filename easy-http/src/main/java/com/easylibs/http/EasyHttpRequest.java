@@ -1,8 +1,13 @@
 package com.easylibs.http;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.easylibs.listener.EventListener;
+import com.easylibs.utils.JsonUtils;
+import com.google.gson.JsonObject;
+
+import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
@@ -24,6 +29,11 @@ public class EasyHttpRequest<T> {
 
     private Class<T> responseType;
     private int socketTimeOutMs;
+
+    private boolean setCacheTtlCalled;
+    private long cacheTtl;
+    private long cacheSoftTtl;
+    private boolean refreshedResponseDeliveryRequired;
 
     private WeakReference<EventListener> eventListenerWeakRef;
     private int eventCode;
@@ -84,6 +94,32 @@ public class EasyHttpRequest<T> {
         this.socketTimeOutMs = socketTimeOutMs;
     }
 
+    public long getCacheTtl() {
+        if (!setCacheTtlCalled) {
+            // by default use cache only for GET requests
+            return httpMethod == Method.GET ? 0 : -1;
+        }
+        return cacheTtl;
+    }
+
+    public void setCacheTtl(long cacheTtl) {
+        this.setCacheTtlCalled = true;
+        this.cacheTtl = cacheTtl;
+    }
+
+    public long getCacheSoftTtl() {
+        return cacheSoftTtl;
+    }
+
+    public void setCacheSoftTtl(long cacheSoftTtl) {
+        setCacheSoftTtl(cacheSoftTtl, false);
+    }
+
+    public void setCacheSoftTtl(long cacheSoftTtl, boolean refreshedResponseDeliveryRequired) {
+        this.cacheSoftTtl = cacheSoftTtl;
+        this.refreshedResponseDeliveryRequired = refreshedResponseDeliveryRequired;
+    }
+
     public void setEventCode(int eventCode) {
         this.eventCode = eventCode;
     }
@@ -92,10 +128,27 @@ public class EasyHttpRequest<T> {
         this.eventListenerWeakRef = new WeakReference<>(eventListener);
     }
 
+    public String getPostJson() {
+        String postJson = null;
+        if (postObject != null) {
+            if (postObject instanceof String) {
+                postJson = (String) postObject;
+            } else if (postObject instanceof JsonObject || postObject instanceof JSONObject) {
+                postJson = postObject.toString();
+            } else {
+                postJson = JsonUtils.jsonify(postObject);
+            }
+        }
+        if (EasyHttp.DEBUG) {
+            Log.v(EasyHttp.LOG_TAG, "Post Body: " + postJson);
+        }
+        return postJson;
+    }
+
     /**
      * @param pEasyHttpResponse
      */
-    public <T> void onResponse(EasyHttpResponse<T> pEasyHttpResponse) {
+    public void onResponse(EasyHttpResponse<T> pEasyHttpResponse) {
         if (eventListenerWeakRef == null) {
             return;
         }
@@ -103,6 +156,9 @@ public class EasyHttpRequest<T> {
         if (listener != null) {
             pEasyHttpResponse.setEasyHttpRequest(this);
             listener.onEvent(eventCode, pEasyHttpResponse);
+            if (!refreshedResponseDeliveryRequired) {
+                eventListenerWeakRef = null;
+            }
         }
     }
 

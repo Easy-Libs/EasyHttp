@@ -1,8 +1,11 @@
 package com.easylibs.http.volley;
 
+import android.util.Log;
+
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.VolleyError;
+import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
 
@@ -26,6 +29,7 @@ class EasyJsonListener<T> implements Listener<EasyHttpResponse<T>>, ErrorListene
 
     @Override
     public void onErrorResponse(VolleyError pResponseError) {
+        Log.e(EasyHttp.LOG_TAG, "onErrorResponse", pResponseError);
         EasyHttpResponse<T> response = EasyVolleyUtils.createEasyHttpResponse(pResponseError);
         mEasyHttpRequest.onResponse(response);
     }

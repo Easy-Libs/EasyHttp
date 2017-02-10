@@ -9,7 +9,6 @@ import com.android.volley.toolbox.JsonRequest;
 import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
-import com.easylibs.utils.JsonUtils;
 
 import java.util.Map;
 
@@ -26,7 +25,7 @@ class EasyJsonRequest<T> extends JsonRequest<EasyHttpResponse<T>> {
      * @param pListener
      */
     EasyJsonRequest(int pMethod, EasyHttpRequest<T> pRequest, Response.Listener<EasyHttpResponse<T>> pListener, Response.ErrorListener pErrorListener) {
-        super(pMethod, pRequest.getUrl(), JsonUtils.jsonify(pRequest.getPostObject()), pListener, pErrorListener);
+        super(pMethod, pRequest.getUrl(), pRequest.getPostJson(), pListener, pErrorListener);
         mEasyHttpRequest = pRequest;
     }
 
@@ -37,11 +36,13 @@ class EasyJsonRequest<T> extends JsonRequest<EasyHttpResponse<T>> {
 
     @Override
     protected Response<EasyHttpResponse<T>> parseNetworkResponse(NetworkResponse pNetworkResponse) {
-        if (pNetworkResponse != null) {
-            EasyHttpResponse<T> easyHttpResponse = EasyVolleyUtils.createEasyHttpResponse(mEasyHttpRequest, pNetworkResponse);
+        EasyHttpResponse<T> easyHttpResponse = EasyVolleyUtils.createEasyHttpResponse(mEasyHttpRequest, pNetworkResponse);
+        if (mEasyHttpRequest.getCacheTtl() == 0) {
             return Response.success(easyHttpResponse, HttpHeaderParser.parseCacheHeaders(pNetworkResponse));
+        } else if (mEasyHttpRequest.getCacheTtl() > 0) {
+            return Response.success(easyHttpResponse, EasyVolleyUtils.parseIgnoreCacheHeaders(mEasyHttpRequest, pNetworkResponse));
         } else {
-            return Response.error(new VolleyError(pNetworkResponse));
+            return Response.success(easyHttpResponse, null);
         }
     }
 

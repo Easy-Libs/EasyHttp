@@ -1,6 +1,7 @@
 package com.easylibs.http.example.controller;
 
 import android.content.Context;
+import android.text.format.DateUtils;
 
 import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpRequest;
@@ -25,6 +26,9 @@ public class ApisController {
         request.setEventListener(pEventListener);
         request.setResponseType(ReverseGeoResponse.class);
 
+        request.setCacheTtl(DateUtils.MINUTE_IN_MILLIS);
+        request.setCacheSoftTtl(DateUtils.MINUTE_IN_MILLIS / 2);
+
         EasyHttp.getExecutor(pContext).executeAsync(request);
     }
 
@@ -36,6 +40,7 @@ public class ApisController {
         request.setHttpMethod(EasyHttpRequest.Method.GET);
         request.setUrl(Constants.URL_GEO_CODE);
         request.setResponseType(ReverseGeoResponse.class);
+        request.setCacheTtl(-1);
 
         return EasyHttp.getExecutor(pContext).executeSync(request);
     }
