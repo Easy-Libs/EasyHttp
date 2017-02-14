@@ -48,11 +48,14 @@ public class EasyVolleyUtils {
      */
     private static <T> EasyHttpResponse<T> createEasyHttpResponse(NetworkResponse pNetworkResponse) {
         EasyHttpResponse<T> easyHttpResponse = new EasyHttpResponse<>();
-        if (pNetworkResponse == null) {
-            return easyHttpResponse;
+        if (pNetworkResponse != null) {
+            easyHttpResponse.setStatusCode(pNetworkResponse.statusCode);
+            easyHttpResponse.setHeaders(pNetworkResponse.headers);
         }
-        easyHttpResponse.setStatusCode(pNetworkResponse.statusCode);
-        easyHttpResponse.setHeaders(pNetworkResponse.headers);
+        if (EasyHttp.DEBUG) {
+            Log.d(EasyHttp.LOG_TAG, "Response Status Code: " + easyHttpResponse.getStatusCode());
+            Log.v(EasyHttp.LOG_TAG, "Response Headers: " + easyHttpResponse.getHeaders());
+        }
         return easyHttpResponse;
     }
 
@@ -83,7 +86,12 @@ public class EasyVolleyUtils {
 
         long now = System.currentTimeMillis();
         entry.ttl = now + pEasyHttpRequest.getCacheTtl();
-        entry.softTtl = now + pEasyHttpRequest.getCacheSoftTtl();
+
+        if (pEasyHttpRequest.getCacheSoftTtl() <= 0) {
+            entry.softTtl = now + pEasyHttpRequest.getCacheTtl();
+        } else {
+            entry.softTtl = now + pEasyHttpRequest.getCacheSoftTtl();
+        }
 
         Map<String, String> headers = pResponse.headers;
         if (headers != null) {
