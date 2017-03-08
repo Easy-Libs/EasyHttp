@@ -30,6 +30,9 @@ public class EasyHttpRequest<T> {
     private Class<T> responseType;
     private int socketTimeOutMs;
 
+    private boolean setRetryCountCalled;
+    private int retryCount;
+
     private boolean setCacheTtlCalled;
     private long cacheTtl;
     private long cacheSoftTtl;
@@ -47,7 +50,15 @@ public class EasyHttpRequest<T> {
     }
 
     public int getHttpMethod() {
-        return httpMethod;
+        switch (httpMethod) {
+            case Method.GET:
+            case Method.POST: {
+                return httpMethod;
+            }
+            default: {
+                return postObject == null ? Method.GET : Method.POST;
+            }
+        }
     }
 
     public void setHttpMethod(int httpMethod) {
@@ -92,6 +103,19 @@ public class EasyHttpRequest<T> {
 
     public void setSocketTimeOutMs(int socketTimeOutMs) {
         this.socketTimeOutMs = socketTimeOutMs;
+    }
+
+    public int getRetryCount() {
+        if (!setRetryCountCalled) {
+            // by default retry once and only for GET requests
+            return httpMethod == Method.GET ? 1 : 0;
+        }
+        return retryCount;
+    }
+
+    public void setRetryCount(int retryCount) {
+        this.setRetryCountCalled = true;
+        this.retryCount = retryCount;
     }
 
     public long getCacheTtl() {

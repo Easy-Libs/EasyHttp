@@ -9,11 +9,12 @@ import org.apache.http.HttpStatus;
 /**
  * Created by easy.libs on 24/1/17.
  */
-public class EasyRetryPolicy extends DefaultRetryPolicy {
+class EasyRetryPolicy extends DefaultRetryPolicy {
 
-    public EasyRetryPolicy(EasyHttpRequest pEasyHttpRequest) {
+    EasyRetryPolicy(EasyHttpRequest pEasyHttpRequest) {
         super(pEasyHttpRequest.getSocketTimeOutMs() > 0 ? pEasyHttpRequest.getSocketTimeOutMs() : DEFAULT_TIMEOUT_MS,
-                DEFAULT_MAX_RETRIES, DEFAULT_BACKOFF_MULT);
+                pEasyHttpRequest.getRetryCount() <= 0 ? 0 : pEasyHttpRequest.getRetryCount(),
+                DEFAULT_BACKOFF_MULT);
     }
 
     @Override
