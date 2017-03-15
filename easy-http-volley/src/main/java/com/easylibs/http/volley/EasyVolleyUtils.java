@@ -16,7 +16,7 @@ import java.util.Map;
 /**
  * Created by easy.libs on 19/1/17.
  */
-public class EasyVolleyUtils {
+class EasyVolleyUtils {
 
     /**
      * @param <T>

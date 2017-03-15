@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 
 /**
@@ -27,7 +28,7 @@ public class EasyHttpRequest<T> {
     private HashMap<String, String> headers;
     private Object postObject;
 
-    private Class<T> responseType;
+    private Type responseType;
     private int socketTimeOutMs;
 
     private boolean setRetryCountCalled;
@@ -89,11 +90,11 @@ public class EasyHttpRequest<T> {
         this.postObject = postObject;
     }
 
-    public Class<T> getResponseType() {
+    public Type getResponseType() {
         return responseType;
     }
 
-    public void setResponseType(Class<T> responseType) {
+    public void setResponseType(Type responseType) {
         this.responseType = responseType;
     }
 
@@ -108,7 +109,7 @@ public class EasyHttpRequest<T> {
     public int getRetryCount() {
         if (!setRetryCountCalled) {
             // by default retry once and only for GET requests
-            return httpMethod == Method.GET ? 1 : 0;
+            return getHttpMethod() == Method.GET ? 1 : 0;
         }
         return retryCount;
     }
@@ -121,7 +122,7 @@ public class EasyHttpRequest<T> {
     public long getCacheTtl() {
         if (!setCacheTtlCalled) {
             // by default use cache only for GET requests
-            return httpMethod == Method.GET ? 0 : -1;
+            return getHttpMethod() == Method.GET ? 0 : -1;
         }
         return cacheTtl;
     }

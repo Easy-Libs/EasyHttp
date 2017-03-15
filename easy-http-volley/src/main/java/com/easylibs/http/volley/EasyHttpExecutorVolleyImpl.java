@@ -97,11 +97,11 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         RequestFuture<EasyHttpResponse<T>> future = RequestFuture.newFuture();
         Request<EasyHttpResponse<T>> volleyRequest = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, future, future);
         volleyRequest.setShouldCache(pRequest.getCacheTtl() >= 0);
-        // TODO - retry policy
+        volleyRequest.setRetryPolicy(new EasyRetryPolicy(pRequest));
         getQueue(pRequest.getContext()).add(volleyRequest);
 
         try {
-            // TODO - timeout?
+            // TODO - is timeout to be provided here again?
             return future.get();
         } catch (Exception e) {
             Log.e(EasyHttp.LOG_TAG, "executeSync", e);
