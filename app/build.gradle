@@ -22,7 +22,7 @@ android {
 dependencies {
     debugCompile project(':easy-http-volley')
 
-    releaseCompile('com.easylibs:easy-http-volley:1.0.3@aar') {
+    releaseCompile('com.easylibs:easy-http-volley:1.0.3.1@aar') {
         transitive true
     }
 

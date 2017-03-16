@@ -98,6 +98,10 @@ public class EasyHttpRequest<T> {
         this.responseType = responseType;
     }
 
+    public void setResponseType(Class<T> responseClassType) {
+        this.responseType = responseClassType;
+    }
+
     public int getSocketTimeOutMs() {
         return socketTimeOutMs;
     }
