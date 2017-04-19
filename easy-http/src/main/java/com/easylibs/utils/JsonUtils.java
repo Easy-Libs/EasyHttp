@@ -2,14 +2,13 @@ package com.easylibs.utils;
 
 import android.util.Log;
 
+import com.easylibs.http.EasyHttp;
 import com.google.gson.Gson;
 
 import java.lang.reflect.Type;
 
 
 public final class JsonUtils {
-
-    private final static String LOG_TAG = JsonUtils.class.getSimpleName();
 
     private final static Gson M_GSON = new Gson();
 
@@ -30,7 +29,7 @@ public final class JsonUtils {
         try {
             return M_GSON.fromJson(pJson, pType);
         } catch (Exception e) {
-            Log.e(LOG_TAG, "objectify() Class " + pType + ", Json: " + pJson, e);
+            Log.e(EasyHttp.LOG_TAG, "JsonUtils#objectify() Class " + pType + ", Json: " + pJson, e);
         }
         return null;
     }
@@ -48,7 +47,7 @@ public final class JsonUtils {
         try {
             return M_GSON.fromJson(pJson, pType);
         } catch (Exception e) {
-            Log.e(LOG_TAG, "objectify() Type: " + pType + ", Json: " + pJson, e);
+            Log.e(EasyHttp.LOG_TAG, "JsonUtils#objectify() Type: " + pType + ", Json: " + pJson, e);
         }
         return null;
     }

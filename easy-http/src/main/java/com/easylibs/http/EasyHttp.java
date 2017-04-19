@@ -3,6 +3,8 @@ package com.easylibs.http;
 import android.content.Context;
 import android.util.Log;
 
+import com.easylibs.utils.EasyUtils;
+
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,17 +47,30 @@ public class EasyHttp {
         if (pDestination == null) {
             pDestination = new HashMap<>();
         }
-        if (pSource != null && !pSource.isEmpty()) {
-            if (pDestination.isEmpty()) {
-                pDestination.putAll(pSource);
-            } else {
-                for (String superHeaderName : pSource.keySet()) {
-                    if (pDestination.containsKey(superHeaderName)) {
-                        pDestination.put(superHeaderName, pSource.get(superHeaderName) + " " + pDestination.get(superHeaderName));
-                    } else {
-                        pDestination.put(superHeaderName, pSource.get(superHeaderName));
-                    }
+        if (pSource == null || pSource.isEmpty()) {
+            return pDestination;
+        }
+        if (pDestination.isEmpty()) {
+            pDestination.putAll(pSource);
+            return pDestination;
+        }
+        for (String headerName : pSource.keySet()) {
+            String sourceValue = pSource.get(headerName);
+            String destValue = pDestination.get(headerName);
+            if (EasyUtils.isBlank(destValue)) {
+                // sourceValue = any, null or blank, destValue = null or blank
+                pDestination.put(headerName, sourceValue);
+            } else if (!EasyUtils.isBlank(sourceValue)) {
+                if (destValue.contains(sourceValue)) {
+                    // nothing to do, destValue already contains or equals sourceValue
+                } else if (sourceValue.contains(destValue)) {
+                    pDestination.put(headerName, sourceValue);
+                } else {
+                    pDestination.put(headerName, destValue + " " + sourceValue);
                 }
+            }
+            if (EasyHttp.DEBUG) {
+                Log.v(EasyHttp.LOG_TAG, headerName + " : " + destValue + " changed to " + pDestination.get(headerName));
             }
         }
         return pDestination;

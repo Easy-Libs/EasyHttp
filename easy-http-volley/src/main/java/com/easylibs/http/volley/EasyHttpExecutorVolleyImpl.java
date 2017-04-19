@@ -15,6 +15,7 @@ import com.easylibs.http.EasyHttpExecutor;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
 
+import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -27,6 +28,7 @@ import org.apache.http.params.HttpParams;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.HashMap;
 
 class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
 
@@ -105,10 +107,23 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
             return future.get();
         } catch (Exception e) {
             Log.e(EasyHttp.LOG_TAG, "executeSync", e);
-            EasyHttpResponse<T> response = new EasyHttpResponse<>();
-            response.setStatusCode(500); // TODO
-            response.setException(e);
-            return response;
+            Throwable temp = e;
+            EasyVolleyError cause = null;
+            while (temp.getCause() != null) {
+                temp = e.getCause();
+                if (temp instanceof EasyVolleyError) {
+                    cause = (EasyVolleyError) temp;
+                    break;
+                }
+            }
+            if (cause != null) {
+                return EasyVolleyUtils.createEasyHttpResponse(cause);
+            } else {
+                EasyHttpResponse<T> response = new EasyHttpResponse<>();
+                response.setStatusCode(500); // TODO
+                response.setException(e);
+                return response;
+            }
         }
     }
 
@@ -139,15 +154,33 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
                     break;
                 }
             }
-            // TODO - add request headers
+            HashMap<String, String> headers = pRequest.getHeaders();
+            if (headers != null && !headers.isEmpty()) {
+                for (String headerName : headers.keySet()) {
+                    request.addHeader(headerName, headers.get(headerName));
+                }
+            }
             httpResponse = client.execute(request);
             easyResponse.setStatusCode(httpResponse.getStatusLine().getStatusCode());
+
+            // set data
             BufferedHttpEntity bufferedEntity = new BufferedHttpEntity(httpResponse.getEntity());
             easyResponse.setData(bufferedEntity.getContent());
-            // TODO - response headers
+
+            // set headers
+            Header[] responseHeaders = httpResponse.getAllHeaders();
+            if (responseHeaders != null && responseHeaders.length != 0) {
+                headers = new HashMap<>(responseHeaders.length);
+                for (Header header : responseHeaders) {
+                    request.addHeader(header.getName(), header.getValue());
+                }
+                easyResponse.setHeaders(headers);
+            }
+            // TODO - cache
         } catch (Exception e) {
             easyResponse.setException(e);
-            e.printStackTrace();
+            Log.e(EasyHttp.LOG_TAG, "getStreamResponse", e);
+            // TODO - retry
         }
         return easyResponse;
     }

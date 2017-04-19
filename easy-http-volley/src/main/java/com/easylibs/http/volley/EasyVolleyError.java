@@ -55,6 +55,7 @@ class EasyVolleyError extends VolleyError {
                 T parsedData = JsonUtils.objectify(dataStr, pEasyHttpRequest.getResponseType());
                 evError.setParsedData(parsedData);
             }
+            return evError;
         }
         if (pVolleyError.getCause() != null && pVolleyError.getMessage() != null) {
             return new EasyVolleyError(pVolleyError.getMessage(), pVolleyError.getCause());
@@ -68,7 +69,7 @@ class EasyVolleyError extends VolleyError {
         return new EasyVolleyError();
     }
 
-    void setParsedData(Object parsedData) {
+    private void setParsedData(Object parsedData) {
         this.parsedData = parsedData;
     }
 
