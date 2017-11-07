@@ -9,8 +9,10 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
+import com.easylibs.utils.ContentType;
 import com.easylibs.utils.JsonUtils;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 /**
@@ -27,16 +29,24 @@ class EasyVolleyUtils {
     static <T> EasyHttpResponse<T> createEasyHttpResponse(EasyHttpRequest<T> pEasyHttpRequest, NetworkResponse pNetworkResponse) {
         EasyHttpResponse<T> easyHttpResponse = createEasyHttpResponse(pNetworkResponse);
         if (pNetworkResponse != null && pNetworkResponse.data != null) {
+            ContentType expectedContentType = pEasyHttpRequest.getResponseContentType();
+            String expectedCharset = expectedContentType == null ? null : expectedContentType.getCharset();
             String dataStr;
             try {
-                dataStr = new String(pNetworkResponse.data, HttpHeaderParser.parseCharset(pNetworkResponse.headers));
-            } catch (Exception e) {
+                dataStr = new String(pNetworkResponse.data, HttpHeaderParser.parseCharset(pNetworkResponse.headers, expectedCharset));
+            } catch (UnsupportedEncodingException e) {
+                Log.e(EasyHttp.LOG_TAG, "EasyVolleyUtils#createEasyHttpResponse", e);
                 dataStr = new String(pNetworkResponse.data);
             }
             if (EasyHttp.DEBUG) {
                 Log.v(EasyHttp.LOG_TAG, "Response Data: " + dataStr);
             }
-            T parsedData = JsonUtils.objectify(dataStr, pEasyHttpRequest.getResponseType());
+            T parsedData = null;
+            if (pEasyHttpRequest.getResponseType() == String.class) {
+                parsedData = (T) dataStr;
+            } else if (expectedContentType == null || ContentType.JSON.equals(expectedContentType)) {
+                parsedData = JsonUtils.objectify(dataStr, pEasyHttpRequest.getResponseType());
+            }
             easyHttpResponse.setData(parsedData);
         }
         return easyHttpResponse;
@@ -46,7 +56,8 @@ class EasyVolleyUtils {
      * @param pNetworkResponse
      * @return
      */
-    private static <T> EasyHttpResponse<T> createEasyHttpResponse(NetworkResponse pNetworkResponse) {
+    private static <T> EasyHttpResponse<T> createEasyHttpResponse(NetworkResponse
+                                                                          pNetworkResponse) {
         EasyHttpResponse<T> easyHttpResponse = new EasyHttpResponse<>();
         if (pNetworkResponse != null) {
             easyHttpResponse.setStatusCode(pNetworkResponse.statusCode);

@@ -4,13 +4,14 @@ import android.util.Log;
 
 import com.easylibs.http.EasyHttp;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.lang.reflect.Type;
 
 
 public final class JsonUtils {
 
-    private final static Gson M_GSON = new Gson();
+    private final static Gson M_GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     public static String jsonify(Object object) {
         return M_GSON.toJson(object);

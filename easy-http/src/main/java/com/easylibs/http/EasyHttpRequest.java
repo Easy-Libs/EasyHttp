@@ -1,12 +1,14 @@
 package com.easylibs.http;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.easylibs.listener.EventListener;
+import com.easylibs.utils.ContentType;
 import com.easylibs.utils.JsonUtils;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
@@ -26,18 +28,26 @@ public class EasyHttpRequest<T> {
     private int httpMethod;
     private String url;
     private HashMap<String, String> headers;
-    private Object postObject;
 
+    private String requestBody;
+    private ContentType requestBodyContentType;
+
+    private ContentType responseContentType;
     private Type responseType;
     private int socketTimeOutMs;
 
     private boolean setRetryCountCalled;
     private int retryCount;
 
-    private boolean setCacheTtlCalled;
+    private boolean ignoreCached;
+
     private long cacheTtl;
+    private boolean setCacheTtlCalled;
+
     private long cacheSoftTtl;
     private boolean refreshedResponseDeliveryRequired;
+
+    private Object tag;
 
     private WeakReference<EventListener> eventListenerWeakRef;
     private int eventCode;
@@ -57,7 +67,7 @@ public class EasyHttpRequest<T> {
                 return httpMethod;
             }
             default: {
-                return postObject == null ? Method.GET : Method.POST;
+                return requestBody == null ? Method.GET : Method.POST;
             }
         }
     }
@@ -82,12 +92,46 @@ public class EasyHttpRequest<T> {
         this.headers = headers;
     }
 
-    public Object getPostObject() {
-        return postObject;
+    /**
+     * @param postObject
+     * @deprecated use {@link EasyHttpRequest#setJsonBody(Object)}
+     * OR {@link EasyHttpRequest#setRequestBody(String, ContentType)} instead
+     */
+    @Deprecated
+    public void setPostObject(Object postObject) {
+        setJsonBody(postObject);
     }
 
-    public void setPostObject(Object postObject) {
-        this.postObject = postObject;
+    public void setJsonBody(Object jsonBody) {
+        String jsonString;
+        if (jsonBody instanceof CharSequence || jsonBody instanceof JsonObject || jsonBody instanceof JSONObject
+                || jsonBody instanceof JsonArray || jsonBody instanceof JSONArray) {
+            jsonString = jsonBody.toString();
+        } else {
+            jsonString = JsonUtils.jsonify(jsonBody);
+        }
+        setRequestBody(jsonString, ContentType.JSON);
+    }
+
+    public void setRequestBody(String requestBody, ContentType requestBodyContentType) {
+        this.requestBody = requestBody;
+        this.requestBodyContentType = requestBodyContentType;
+    }
+
+    public String getRequestBody() {
+        return requestBody;
+    }
+
+    public ContentType getRequestBodyContentType() {
+        return requestBodyContentType;
+    }
+
+    public ContentType getResponseContentType() {
+        return responseContentType;
+    }
+
+    public void setResponseContentType(ContentType responseContentType) {
+        this.responseContentType = responseContentType;
     }
 
     public Type getResponseType() {
@@ -123,6 +167,14 @@ public class EasyHttpRequest<T> {
         this.retryCount = retryCount;
     }
 
+    public boolean isIgnoreCached() {
+        return ignoreCached;
+    }
+
+    public void setIgnoreCached(boolean ignoreCached) {
+        this.ignoreCached = ignoreCached;
+    }
+
     public long getCacheTtl() {
         if (!setCacheTtlCalled) {
             // by default use cache only for GET requests
@@ -149,29 +201,20 @@ public class EasyHttpRequest<T> {
         this.refreshedResponseDeliveryRequired = refreshedResponseDeliveryRequired;
     }
 
+    public Object getTag() {
+        return tag;
+    }
+
+    public void setTag(Object tag) {
+        this.tag = tag;
+    }
+
     public void setEventCode(int eventCode) {
         this.eventCode = eventCode;
     }
 
     public void setEventListener(EventListener eventListener) {
         this.eventListenerWeakRef = new WeakReference<>(eventListener);
-    }
-
-    public String getPostJson() {
-        String postJson = null;
-        if (postObject != null) {
-            if (postObject instanceof String) {
-                postJson = (String) postObject;
-            } else if (postObject instanceof JsonObject || postObject instanceof JSONObject) {
-                postJson = postObject.toString();
-            } else {
-                postJson = JsonUtils.jsonify(postObject);
-            }
-        }
-        if (EasyHttp.DEBUG) {
-            Log.v(EasyHttp.LOG_TAG, "Post Body: " + postJson);
-        }
-        return postJson;
     }
 
     /**

@@ -14,6 +14,7 @@ import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpExecutor;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
+import com.easylibs.utils.ContentType;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -22,6 +23,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.BufferedHttpEntity;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -31,8 +33,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 
 class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
-
-    private static final String LOG_TAG = EasyHttpExecutorVolleyImpl.class.getSimpleName();
 
     private RequestQueue mBackgroundRequestsQueue;
     private RequestQueue mForegroundRequestsQueue;
@@ -65,9 +65,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         }
         int volleyHttpMethod = getVolleyHttpMethod(pRequest.getHttpMethod());
         EasyJsonListener<T> listener = new EasyJsonListener<>(pRequest);
-        Request<EasyHttpResponse<T>> volleyRequest = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, listener, listener);
-        volleyRequest.setRetryPolicy(new EasyRetryPolicy(pRequest));
-        volleyRequest.setShouldCache(pRequest.getCacheTtl() >= 0);
+        Request<EasyHttpResponse<T>> volleyRequest = new EasyVolleyRequest<T>(volleyHttpMethod, pRequest, listener, listener);
 
         getQueue(pRequest.getContext()).add(volleyRequest);
     }
@@ -97,9 +95,8 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
 
         int volleyHttpMethod = getVolleyHttpMethod(pRequest.getHttpMethod());
         RequestFuture<EasyHttpResponse<T>> future = RequestFuture.newFuture();
-        Request<EasyHttpResponse<T>> volleyRequest = new EasyJsonRequest<T>(volleyHttpMethod, pRequest, future, future);
-        volleyRequest.setShouldCache(pRequest.getCacheTtl() >= 0);
-        volleyRequest.setRetryPolicy(new EasyRetryPolicy(pRequest));
+        Request<EasyHttpResponse<T>> volleyRequest = new EasyVolleyRequest<T>(volleyHttpMethod, pRequest, future, future);
+
         getQueue(pRequest.getContext()).add(volleyRequest);
 
         try {
@@ -146,7 +143,14 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
             switch (pRequest.getHttpMethod()) {
                 case EasyHttpRequest.Method.POST: {
                     request = new HttpPost(pRequest.getUrl());
-                    // TODO - entity
+                    if (pRequest.getRequestBody() != null) {
+                        HttpPost httpPost = (HttpPost) request;
+                        httpPost.setEntity(new StringEntity(pRequest.getRequestBody()));
+                        ContentType contentType = pRequest.getRequestBodyContentType();
+                        if (contentType != null) {
+                            httpPost.addHeader(ContentType.HEADER_ContentType, contentType.toString());
+                        }
+                    }
                     break;
                 }
                 default: {
