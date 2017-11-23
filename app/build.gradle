@@ -1,15 +1,19 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 24
-    buildToolsVersion "24.0.1"
+    compileSdkVersion 27
+    buildToolsVersion "27.0.1"
 
     defaultConfig {
         applicationId "com.easylibs.http.example"
-        minSdkVersion 16
-        targetSdkVersion 23
-        versionCode 6
-        versionName "1.0.3.2"
+        minSdkVersion 11
+        targetSdkVersion 27
+        versionCode 7
+        versionName "1.0.3.3"
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildTypes {
         release {
@@ -20,11 +24,7 @@ android {
 }
 
 dependencies {
-    debugCompile project(':easy-http-volley')
-
-    releaseCompile('com.easylibs:easy-http-volley:1.0.3.1@aar') {
+    compile('com.easylibs:easy-http-volley:1.0.3.3@aar') {
         transitive true
     }
-
-    compile 'com.android.support:appcompat-v7:24.2.1'
 }
