@@ -10,7 +10,7 @@ android {
         minSdkVersion 11
         targetSdkVersion 26
         versionCode 6
-        versionName "1.0.3.2"
+        versionName "1.0.3.3"
 
         consumerProguardFiles 'proguard-rules.pro'
     }
