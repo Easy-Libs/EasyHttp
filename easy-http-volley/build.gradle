@@ -1,16 +1,15 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    compileSdkVersion projectCompileSdkVersion
 
     useLibrary 'org.apache.http.legacy'
 
     defaultConfig {
         minSdkVersion 11
-        targetSdkVersion 26
-        versionCode 6
-        versionName "1.0.3.3"
+        targetSdkVersion 27
+        versionCode 7
+        versionName "1.0.3.4"
 
         consumerProguardFiles 'proguard-rules.pro'
     }
@@ -23,10 +22,12 @@ android {
 }
 
 dependencies {
-    compile('com.easylibs:easy-http:1.0.3.3@aar') {
+    debugApi project(':easy-http')
+
+    releaseApi('com.easylibs:easy-http:1.0.3.3@aar') {
         transitive = true
     }
-    compile('com.android.volley:volley:1.0.0') {
+    implementation('com.android.volley:volley:1.0.0') {
         transitive = true
     }
 }
@@ -39,7 +40,7 @@ ext {
     libraryName = 'Easy Http - Volley'
     artifact = 'easy-http-volley'
 
-    libraryVersion = '1.0.3.3'
+    libraryVersion = '1.0.3.4'
     libraryDescription = 'A set of classes to connect volley with easy-http'
 
     siteUrl = 'https://github.com/Easy-Libs'

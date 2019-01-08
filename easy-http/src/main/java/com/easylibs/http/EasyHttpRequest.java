@@ -25,7 +25,7 @@ public class EasyHttpRequest<T> {
 
     private WeakReference<Context> contextWeakRef;
 
-    private int httpMethod;
+    private int httpMethod = Method.DEPRECATED_GET_OR_POST;
     private String url;
     private HashMap<String, String> headers;
 
@@ -61,15 +61,7 @@ public class EasyHttpRequest<T> {
     }
 
     public int getHttpMethod() {
-        switch (httpMethod) {
-            case Method.GET:
-            case Method.POST: {
-                return httpMethod;
-            }
-            default: {
-                return requestBody == null ? Method.GET : Method.POST;
-            }
-        }
+        return httpMethod;
     }
 
     public void setHttpMethod(int httpMethod) {
@@ -127,7 +119,7 @@ public class EasyHttpRequest<T> {
     }
 
     public ContentType getResponseContentType() {
-        return responseContentType;
+        return responseContentType == null ? ContentType.JSON : responseContentType;
     }
 
     public void setResponseContentType(ContentType responseContentType) {
@@ -235,11 +227,17 @@ public class EasyHttpRequest<T> {
     }
 
     /**
-     * @author sachin.gupta
+     * Supported request methods.
      */
-    public static class Method {
-
-        public static final int GET = 1;
-        public static final int POST = 2;
+    public interface Method {
+        int DEPRECATED_GET_OR_POST = -1;
+        int GET = 0;
+        int POST = 1;
+        int PUT = 2;
+        int DELETE = 3;
+        int HEAD = 4;
+        int OPTIONS = 5;
+        int TRACE = 6;
+        int PATCH = 7;
     }
 }

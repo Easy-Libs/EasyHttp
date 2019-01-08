@@ -63,23 +63,44 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         if (EasyHttp.DEBUG) {
             Log.d(EasyHttp.LOG_TAG, "executeAsync URL: " + pRequest.getUrl());
         }
-        int volleyHttpMethod = getVolleyHttpMethod(pRequest.getHttpMethod());
+        int volleyHttpMethod = getVolleyHttpMethod(pRequest);
         EasyJsonListener<T> listener = new EasyJsonListener<>(pRequest);
         Request<EasyHttpResponse<T>> volleyRequest = new EasyVolleyRequest<T>(volleyHttpMethod, pRequest, listener, listener);
 
         getQueue(pRequest.getContext()).add(volleyRequest);
     }
 
-    private int getVolleyHttpMethod(int httpMethod) {
-        switch (httpMethod) {
+    private <T> int getVolleyHttpMethod(EasyHttpRequest<T> pRequest) {
+        switch (pRequest.getHttpMethod()) {
             case EasyHttpRequest.Method.GET: {
                 return Request.Method.GET;
             }
             case EasyHttpRequest.Method.POST: {
                 return Request.Method.POST;
             }
+            case EasyHttpRequest.Method.PUT: {
+                return Request.Method.PUT;
+            }
+            case EasyHttpRequest.Method.DELETE: {
+                return Request.Method.DELETE;
+            }
+            case EasyHttpRequest.Method.HEAD: {
+                return Request.Method.HEAD;
+            }
+            case EasyHttpRequest.Method.OPTIONS: {
+                return Request.Method.OPTIONS;
+            }
+            case EasyHttpRequest.Method.TRACE: {
+                return Request.Method.TRACE;
+            }
+            case EasyHttpRequest.Method.PATCH: {
+                return Request.Method.PATCH;
+            }
             default: {
-                return Request.Method.DEPRECATED_GET_OR_POST;
+                if (pRequest.getRequestBody() == null) {
+                    return Request.Method.GET;
+                }
+                return Request.Method.POST;
             }
         }
     }
@@ -93,7 +114,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
             return getStreamResponse(pRequest);
         }
 
-        int volleyHttpMethod = getVolleyHttpMethod(pRequest.getHttpMethod());
+        int volleyHttpMethod = getVolleyHttpMethod(pRequest);
         RequestFuture<EasyHttpResponse<T>> future = RequestFuture.newFuture();
         Request<EasyHttpResponse<T>> volleyRequest = new EasyVolleyRequest<T>(volleyHttpMethod, pRequest, future, future);
 
@@ -101,7 +122,9 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
 
         try {
             // TODO - is timeout to be provided here again?
-            return future.get();
+            EasyHttpResponse<T> response = future.get();
+            response.setEasyHttpRequest(pRequest);
+            return response;
         } catch (Exception e) {
             Log.e(EasyHttp.LOG_TAG, "executeSync", e);
             Throwable temp = e;
@@ -117,6 +140,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
                 return EasyVolleyUtils.createEasyHttpResponse(cause);
             } else {
                 EasyHttpResponse<T> response = new EasyHttpResponse<>();
+                response.setEasyHttpRequest(pRequest);
                 response.setStatusCode(500); // TODO
                 response.setException(e);
                 return response;
@@ -130,6 +154,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
      */
     private EasyHttpResponse getStreamResponse(EasyHttpRequest pRequest) {
         EasyHttpResponse<InputStream> easyResponse = new EasyHttpResponse<>();
+        easyResponse.setEasyHttpRequest(pRequest);
 
         HttpResponse httpResponse;
         try {

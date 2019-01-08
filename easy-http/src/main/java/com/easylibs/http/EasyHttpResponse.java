@@ -30,7 +30,7 @@ public class EasyHttpResponse<T> {
     /**
      * request for which this response is, will be null in case of sync requests
      */
-    private EasyHttpRequest easyHttpRequest;
+    private EasyHttpRequest<T> easyHttpRequest;
 
     /**
      * @return the statusCode
@@ -91,14 +91,14 @@ public class EasyHttpResponse<T> {
     /**
      * @param easyHttpRequest the easyHttpRequest to set
      */
-    void setEasyHttpRequest(EasyHttpRequest easyHttpRequest) {
+    public void setEasyHttpRequest(EasyHttpRequest<T> easyHttpRequest) {
         this.easyHttpRequest = easyHttpRequest;
     }
 
     /**
      * @return request for which this response is, will be null in case of sync requests
      */
-    public EasyHttpRequest getEasyHttpRequest() {
+    public EasyHttpRequest<T> getEasyHttpRequest() {
         return easyHttpRequest;
     }
 }

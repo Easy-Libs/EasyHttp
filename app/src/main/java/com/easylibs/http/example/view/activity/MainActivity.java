@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.RadioButton;
 
 import com.easylibs.http.EasyHttp;
+import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
 import com.easylibs.http.example.BuildConfig;
 import com.easylibs.http.example.Constants;
@@ -47,11 +48,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Even
                 } else {
                     new Thread(() -> {
                         EasyHttpResponse<String> response = ApisController.getResponseAsString(MainActivity.this, null);
-                        if (response.getData() == null) {
-                            Log.e(LOG_TAG, "String Response(Sync): " + response.getStatusCode());
-                            return;
-                        }
-                        Log.d(LOG_TAG, "String Response(Sync): " + response.getData());
+                        onResponse(response, "Sync-String");
                     }).start();
                 }
                 break;
@@ -62,11 +59,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Even
                 } else {
                     new Thread(() -> {
                         EasyHttpResponse<BaseResponse> response = ApisController.getParsedResponse(MainActivity.this, null);
-                        if (response.getData() == null) {
-                            Log.e(LOG_TAG, "Parsed Response(Sync): " + response.getStatusCode());
-                            return;
-                        }
-                        Log.d(LOG_TAG, "Parsed Response(Sync): " + response.getData());
+                        onResponse(response, "Sync-Parsed");
                     }).start();
                 }
                 break;
@@ -74,12 +67,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Even
             case R.id.btn_get_stream: {
                 new Thread(() -> {
                     EasyHttpResponse<InputStream> response = ApisController.getStream(MainActivity.this);
-                    if (response.getData() == null) {
-                        Log.e(LOG_TAG, "Stream Response(Sync): " + response.getStatusCode());
-                        return;
-                    }
-                    boolean saved = createAppPrivateFile(MainActivity.this, "google-doodle.jpg", response.getData());
-                    Log.d(LOG_TAG, "Stream Response(Sync): " + (saved ? "Stream saved as file" : "Error in saving stream as file"));
+                    onResponse(response, "Sync-Stream");
                 }).start();
                 break;
             }
@@ -90,24 +78,35 @@ public class MainActivity extends Activity implements View.OnClickListener, Even
     public void onEvent(int pEventCode, Object pEventData) {
         switch (pEventCode) {
             case Constants.EVENT_GET_PLACES_AS_STRING: {
-                EasyHttpResponse<String> response = (EasyHttpResponse) pEventData;
-                if (response.getData() != null) {
-                    Log.d(LOG_TAG, "String Response(Async): " + response.getData());
-                } else {
-                    Log.e(LOG_TAG, "String Response(Async): " + response.getStatusCode());
-                }
+                onResponse((EasyHttpResponse) pEventData, "Async-String");
                 break;
             }
             case Constants.EVENT_GET_PLACES_PARSED: {
-                EasyHttpResponse<BaseResponse> response = (EasyHttpResponse) pEventData;
-                if (response.getData() != null) {
-                    Log.d(LOG_TAG, "Parsed Response(Async): " + response.getData().getStatus());
-                } else {
-                    Log.e(LOG_TAG, "Parsed Response(Async): " + response.getStatusCode());
-                }
+                onResponse((EasyHttpResponse) pEventData, "Async-Parsed");
                 break;
             }
         }
+    }
+
+    private <T> void onResponse(EasyHttpResponse<T> pResponse, String pRequestTypeTag) {
+        String logMsgPrefix = "Response(" + pRequestTypeTag + "): ";
+        if (pResponse.getData() == null) {
+            Log.e(LOG_TAG, logMsgPrefix + pResponse.getStatusCode());
+            return;
+        }
+        EasyHttpRequest<T> request = pResponse.getEasyHttpRequest();
+        if (request.getResponseType() == String.class) {
+            Log.d(LOG_TAG, logMsgPrefix + pResponse.getData());
+            return;
+        }
+        if (request.getResponseType() == InputStream.class) {
+            EasyHttpResponse<InputStream> response = (EasyHttpResponse<InputStream>) pResponse;
+            boolean saved = createAppPrivateFile(MainActivity.this, "google-doodle.jpg", response.getData());
+            Log.d(LOG_TAG, logMsgPrefix + (saved ? "Stream saved as file" : "Error in saving stream as file"));
+            return;
+        }
+        EasyHttpResponse<BaseResponse> response = (EasyHttpResponse<BaseResponse>) pResponse;
+        Log.d(LOG_TAG, logMsgPrefix + response.getData().getStatus());
     }
 
     /**

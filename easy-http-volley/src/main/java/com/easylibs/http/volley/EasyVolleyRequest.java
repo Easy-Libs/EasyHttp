@@ -35,7 +35,7 @@ class EasyVolleyRequest<T> extends Request<EasyHttpResponse<T>> {
         mEasyHttpRequest = pRequest;
         mListener = pListener;
 
-        setTag(pRequest.getTag());
+        setTag(pRequest.getTag()); // TODO - check and complete it's usage
         setRetryPolicy(new EasyRetryPolicy(pRequest));
         setShouldCache(!pRequest.isIgnoreCached() && pRequest.getCacheTtl() >= 0);
     }
