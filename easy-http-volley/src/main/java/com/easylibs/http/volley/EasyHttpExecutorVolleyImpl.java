@@ -2,10 +2,12 @@ package com.easylibs.http.volley;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.BaseHttpStack;
 import com.android.volley.toolbox.BasicNetwork;
 import com.android.volley.toolbox.DiskBasedCache;
 import com.android.volley.toolbox.HurlStack;
@@ -15,6 +17,10 @@ import com.easylibs.http.EasyHttpExecutor;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
 import com.easylibs.utils.ContentType;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.security.ProviderInstaller;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -30,6 +36,8 @@ import org.apache.http.params.HttpParams;
 
 import java.io.File;
 import java.io.InputStream;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 
 class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
@@ -42,7 +50,34 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         // TODO - same cache should be accessible by other network layers
         File cacheDir = new File(pContext.getCacheDir(), "networkCache");
         DiskBasedCache diskBasedCache = new DiskBasedCache(cacheDir);
-        BasicNetwork network = new BasicNetwork(new HurlStack());
+
+        BaseHttpStack stack;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN && Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+
+            try {
+                ProviderInstaller.installIfNeeded(pContext);
+            } catch (GooglePlayServicesRepairableException e) {
+                // Prompt the user to install/update/enable Google Play services.
+                GoogleApiAvailability.getInstance().showErrorNotification(pContext, e.getConnectionStatusCode());
+            } catch (GooglePlayServicesNotAvailableException e) {
+                // Indicates a non-recoverable error: let the user know.
+            }
+
+            try {
+                stack = new HurlStack(null, new TLSSocketFactory());
+            } catch (KeyManagementException e) {
+                Log.e(EasyHttp.LOG_TAG, "Could not create new stack for TLS v1.2", e);
+                stack = new HurlStack();
+            } catch (NoSuchAlgorithmException e) {
+                Log.e(EasyHttp.LOG_TAG, "Could not create new stack for TLS v1.2", e);
+                stack = new HurlStack();
+            }
+        } else {
+            stack = new HurlStack();
+        }
+
+        BasicNetwork network = new BasicNetwork(stack);
 
         mBackgroundRequestsQueue = new RequestQueue(diskBasedCache, network);
         mBackgroundRequestsQueue.start();
