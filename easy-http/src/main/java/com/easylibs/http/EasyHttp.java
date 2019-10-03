@@ -1,5 +1,6 @@
 package com.easylibs.http;
 
+import android.app.Application;
 import android.content.Context;
 import android.util.Log;
 
@@ -27,9 +28,9 @@ public class EasyHttp {
         if (sInstance == null) {
             try {
                 Class<?> classObj = Class.forName("com.easylibs.http.volley.EasyHttpExecutorVolleyImpl");
-                Constructor<?> constructor = classObj.getDeclaredConstructor(Context.class);
+                Constructor<?> constructor = classObj.getDeclaredConstructor(Application.class);
                 constructor.setAccessible(true);
-                sInstance = (EasyHttpExecutor) constructor.newInstance(pContext);
+                sInstance = (EasyHttpExecutor) constructor.newInstance((Application) pContext.getApplicationContext());
                 constructor.setAccessible(false);
             } catch (Exception e) {
                 Log.e(LOG_TAG, "getExecutor", e);

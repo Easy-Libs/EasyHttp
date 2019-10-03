@@ -44,6 +44,7 @@ public class ApisController {
         setGeoCodeServiceDetails(pContext, request);
 
         request.setResponseType(BaseResponse.class);
+        request.setQueueBehaviour(EasyHttpRequest.QueueBehaviour.USE_NEW);
 
         if (pEventListener == null) {
             // sync
@@ -67,7 +68,7 @@ public class ApisController {
 
         // cache options
         // request.setCacheTtl(-1);
-        // request.setIgnoreCached(true);
+        request.setIgnoreCached(true);
         request.setCacheTtl(DateUtils.MINUTE_IN_MILLIS);
         request.setCacheSoftTtl(DateUtils.MINUTE_IN_MILLIS / 2);
     }

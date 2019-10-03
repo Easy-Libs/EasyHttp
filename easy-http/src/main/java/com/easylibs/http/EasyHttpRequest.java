@@ -49,6 +49,8 @@ public class EasyHttpRequest<T> {
 
     private Object tag;
 
+    private int queueBehaviour;
+
     private WeakReference<EventListener> eventListenerWeakRef;
     private int eventCode;
 
@@ -201,6 +203,14 @@ public class EasyHttpRequest<T> {
         this.tag = tag;
     }
 
+    public int getQueueBehaviour() {
+        return queueBehaviour;
+    }
+
+    public void setQueueBehaviour(int queueBehaviour) {
+        this.queueBehaviour = queueBehaviour;
+    }
+
     public void setEventCode(int eventCode) {
         this.eventCode = eventCode;
     }
@@ -239,5 +249,13 @@ public class EasyHttpRequest<T> {
         int OPTIONS = 5;
         int TRACE = 6;
         int PATCH = 7;
+    }
+
+    /**
+     * Supported request methods.
+     */
+    public interface QueueBehaviour {
+        int DEFAULT = 0;
+        int USE_NEW = 1;
     }
 }

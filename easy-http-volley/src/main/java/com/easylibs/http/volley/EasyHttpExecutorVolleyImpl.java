@@ -1,6 +1,7 @@
 package com.easylibs.http.volley;
 
 import android.app.Activity;
+import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 import android.util.Log;
@@ -42,14 +43,17 @@ import java.util.HashMap;
 
 class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
 
+    private DiskBasedCache mDiskBasedCache;
+    private BasicNetwork mBasicNetwork;
+
     private RequestQueue mBackgroundRequestsQueue;
     private RequestQueue mForegroundRequestsQueue;
 
-    private EasyHttpExecutorVolleyImpl(Context pContext) {
+    private EasyHttpExecutorVolleyImpl(Application pContext) {
 
         // TODO - same cache should be accessible by other network layers
         File cacheDir = new File(pContext.getCacheDir(), "networkCache");
-        DiskBasedCache diskBasedCache = new DiskBasedCache(cacheDir);
+        mDiskBasedCache = new DiskBasedCache(cacheDir);
 
         BaseHttpStack stack;
 
@@ -77,20 +81,30 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
             stack = new HurlStack();
         }
 
-        BasicNetwork network = new BasicNetwork(stack);
+        mBasicNetwork = new BasicNetwork(stack);
 
-        mBackgroundRequestsQueue = new RequestQueue(diskBasedCache, network);
+        mBackgroundRequestsQueue = new RequestQueue(mDiskBasedCache, mBasicNetwork);
         mBackgroundRequestsQueue.start();
 
-        mForegroundRequestsQueue = new RequestQueue(diskBasedCache, network);
+        mForegroundRequestsQueue = new RequestQueue(mDiskBasedCache, mBasicNetwork);
         mForegroundRequestsQueue.start();
     }
 
-    private RequestQueue getQueue(Context pContext) {
-        if (pContext instanceof Activity) {
-            return mForegroundRequestsQueue;
+    private <T> void add(Context pContext, Request<T> pRequest, int pQueueBehaviour) {
+        if (pQueueBehaviour == EasyHttpRequest.QueueBehaviour.USE_NEW) {
+            RequestQueue requestQueue = new RequestQueue(mDiskBasedCache, mBasicNetwork);
+            requestQueue.addRequestFinishedListener(request -> {
+                if (request == pRequest) {
+                    requestQueue.stop();
+                }
+            });
+            requestQueue.start();
+            requestQueue.add(pRequest);
+        } else if (pContext instanceof Activity) {
+            mForegroundRequestsQueue.add(pRequest);
+        } else {
+            mBackgroundRequestsQueue.add(pRequest);
         }
-        return mBackgroundRequestsQueue;
     }
 
     @Override
@@ -102,7 +116,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         EasyJsonListener<T> listener = new EasyJsonListener<>(pRequest);
         Request<EasyHttpResponse<T>> volleyRequest = new EasyVolleyRequest<T>(volleyHttpMethod, pRequest, listener, listener);
 
-        getQueue(pRequest.getContext()).add(volleyRequest);
+        add(pRequest.getContext(), volleyRequest, pRequest.getQueueBehaviour());
     }
 
     private <T> int getVolleyHttpMethod(EasyHttpRequest<T> pRequest) {
@@ -153,7 +167,7 @@ class EasyHttpExecutorVolleyImpl implements EasyHttpExecutor {
         RequestFuture<EasyHttpResponse<T>> future = RequestFuture.newFuture();
         Request<EasyHttpResponse<T>> volleyRequest = new EasyVolleyRequest<T>(volleyHttpMethod, pRequest, future, future);
 
-        getQueue(pRequest.getContext()).add(volleyRequest);
+        add(pRequest.getContext(), volleyRequest, pRequest.getQueueBehaviour());
 
         try {
             // TODO - is timeout to be provided here again?

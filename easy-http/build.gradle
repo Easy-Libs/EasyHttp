@@ -6,10 +6,14 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 8
-        versionName "1.0.3.4"
+        versionCode 1035
+        versionName "1.0.3.5"
 
         consumerProguardFiles 'proguard-rules.pro'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildTypes {
         release {
@@ -33,7 +37,7 @@ ext {
     libraryName = 'Easy Http'
     artifact = 'easy-http'
 
-    libraryVersion = '1.0.3.4'
+    libraryVersion = '1.0.3.5'
     libraryDescription = 'A set of classes to connect to multiple HTTP libraries'
 
     siteUrl = 'https://github.com/Easy-Libs'

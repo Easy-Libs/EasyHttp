@@ -8,10 +8,14 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 8
-        versionName "1.0.3.4"
+        versionCode 1035
+        versionName "1.0.3.5"
 
         consumerProguardFiles 'proguard-rules.pro'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
     buildTypes {
         release {
@@ -22,9 +26,7 @@ android {
 }
 
 dependencies {
-    debugCompile project(':easy-http')
-
-    releaseCompile('com.easylibs:easy-http:1.0.3.4') {
+    compile('com.easylibs:easy-http:1.0.3.5') {
         transitive true
     }
     compile('com.google.android.gms:play-services-base:16.0.1') {
@@ -43,7 +45,7 @@ ext {
     libraryName = 'Easy Http - Volley'
     artifact = 'easy-http-volley'
 
-    libraryVersion = '1.0.3.4'
+    libraryVersion = '1.0.3.5'
     libraryDescription = 'A set of classes to connect volley with easy-http'
 
     siteUrl = 'https://github.com/Easy-Libs'

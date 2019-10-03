@@ -7,8 +7,8 @@ android {
         applicationId "com.easylibs.http.example"
         minSdkVersion 14
         targetSdkVersion 27
-        versionCode 8
-        versionName "1.0.3.4"
+        versionCode 1035
+        versionName "1.0.3.5"
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -23,7 +23,5 @@ android {
 }
 
 dependencies {
-    debugApi project(':easy-http-volley')
-
-    releaseApi 'com.easylibs:easy-http-volley:1.0.3.4'
+    api 'com.easylibs:easy-http-volley:1.0.3.5'
 }
