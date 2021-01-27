@@ -17,7 +17,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:onClick="onClick"
-            android:text="Get String Data" />
+            android:text="Get String" />
 
         <RadioGroup
             android:layout_width="wrap_content"
@@ -52,7 +52,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:onClick="onClick"
-            android:text="Get Parsed Object" />
+            android:text="Get Parsed Obj" />
 
         <RadioGroup
             android:layout_width="wrap_content"
@@ -82,12 +82,47 @@
         android:orientation="horizontal">
 
         <Button
+            android:id="@+id/btn_post_stream"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:onClick="onClick"
+            android:text="Post File" />
+
+        <RadioGroup
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radio_mpe_sync"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sync" />
+
+            <RadioButton
+                android:id="@+id/radio_mpe_async"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="Async" />
+
+        </RadioGroup>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <Button
             android:id="@+id/btn_get_stream"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:onClick="onClick"
-            android:text="Get File As Stream" />
+            android:text="Get Stream" />
 
         <RadioGroup
             android:layout_width="wrap_content"

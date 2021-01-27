@@ -1,5 +1,11 @@
 package com.easylibs.utils;
 
+import android.util.Log;
+
+import com.easylibs.http.EasyHttp;
+
+import java.io.Closeable;
+
 /**
  * Created by easy.libs on 19/4/17.
  */
@@ -18,5 +24,18 @@ public class EasyUtils {
         String temp1 = pStr1 == null ? "" : pStr1.trim();
         String temp2 = pStr2 == null ? "" : pStr2.trim();
         return temp1.equals(temp2);
+    }
+
+    /**
+     * @param pCloseable
+     */
+    public static void closeSafely(Closeable pCloseable) {
+        if (pCloseable != null) {
+            try {
+                pCloseable.close();
+            } catch (Exception e) {
+                Log.e(EasyHttp.LOG_TAG, "closeSafely() " + e.getMessage());
+            }
+        }
     }
 }

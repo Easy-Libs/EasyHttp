@@ -7,10 +7,17 @@ public class ContentType {
 
     public static final String HEADER_ContentType = "Content-Type";
 
+    private static final String SEPARATOR = ";";
+    private static final String PREFIX_charset = "charset=";
+
     public static final ContentType JSON = new ContentType("application/json", "utf-8");
 
     private String mimeType;
     private String charset;
+
+    public ContentType(String contentType) {
+        mimeType = contentType;
+    }
 
     public ContentType(String mimeType, String charset) {
         this.mimeType = mimeType;
@@ -49,6 +56,6 @@ public class ContentType {
         if (EasyUtils.isBlank(charset)) {
             return mimeType;
         }
-        return String.format("%s; charset=%s", mimeType, charset);
+        return String.format("%s; " + PREFIX_charset + "%s", mimeType, charset);
     }
 }

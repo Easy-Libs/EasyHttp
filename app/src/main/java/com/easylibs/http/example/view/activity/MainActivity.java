@@ -16,8 +16,8 @@ import com.easylibs.http.example.R;
 import com.easylibs.http.example.controller.ApisController;
 import com.easylibs.http.example.model.BaseResponse;
 import com.easylibs.listener.EventListener;
+import com.easylibs.utils.EasyUtils;
 
-import java.io.Closeable;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -26,7 +26,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Even
     private static final String LOG_TAG = MainActivity.class.getSimpleName();
 
     private RadioButton mRadioBtnStringAsync;
-    private RadioButton mRadioBtnParsedObjASync;
+    private RadioButton mRadioBtnParsedObjAsync;
+    private RadioButton mRadioBtnFileMpeAsync;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +37,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Even
         EasyHttp.DEBUG = BuildConfig.DEBUG;
 
         mRadioBtnStringAsync = findViewById(R.id.radio_string_async);
-        mRadioBtnParsedObjASync = findViewById(R.id.radio_parsed_async);
+        mRadioBtnParsedObjAsync = findViewById(R.id.radio_parsed_async);
+        mRadioBtnFileMpeAsync = findViewById(R.id.radio_mpe_async);
     }
 
     @Override
@@ -54,12 +56,27 @@ public class MainActivity extends Activity implements View.OnClickListener, Even
                 break;
             }
             case R.id.btn_parsed_json: {
-                if (mRadioBtnParsedObjASync.isChecked()) {
+                if (mRadioBtnParsedObjAsync.isChecked()) {
                     ApisController.getParsedResponse(this, this);
                 } else {
                     new Thread(() -> {
                         EasyHttpResponse<BaseResponse> response = ApisController.getParsedResponse(MainActivity.this, null);
                         onResponse(response, "Sync-Parsed");
+                    }).start();
+                }
+                break;
+            }
+            case R.id.btn_post_stream: {
+                if (mRadioBtnFileMpeAsync.isChecked()) {
+                    ApisController.postStream(MainActivity.this, this);
+                } else {
+                    new Thread(() -> {
+                        EasyHttpResponse<BaseResponse> response = ApisController.postStream(MainActivity.this, null);
+                        if (response.getData() == null) {
+                            Log.e(LOG_TAG, "Post File IN MPE (Sync): " + response.getStatusCode());
+                            return;
+                        }
+                        Log.d(LOG_TAG, "Post File In MPE (Sync): " + response.getData());
                     }).start();
                 }
                 break;
@@ -83,6 +100,15 @@ public class MainActivity extends Activity implements View.OnClickListener, Even
             }
             case Constants.EVENT_GET_PLACES_PARSED: {
                 onResponse((EasyHttpResponse) pEventData, "Async-Parsed");
+                break;
+            }
+            case Constants.EVENT_POST_FILE_IN_MPE: {
+                EasyHttpResponse<BaseResponse> response = (EasyHttpResponse) pEventData;
+                if (response.getData() != null) {
+                    Log.d(LOG_TAG, "Post File In MPE (Async): " + response.getData().getStatus());
+                } else {
+                    Log.e(LOG_TAG, "Post File In MPE (Async): " + response.getStatusCode());
+                }
                 break;
             }
         }
@@ -130,21 +156,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Even
             Log.e(LOG_TAG, "createAppPrivateFile() " + e.getMessage() + ", " + pAppPrivateFileName);
             return false;
         } finally {
-            closeSafely(pInputStream);
-            closeSafely(outputStream);
-        }
-    }
-
-    /**
-     * @param pCloseable
-     */
-    private static void closeSafely(Closeable pCloseable) {
-        if (pCloseable != null) {
-            try {
-                pCloseable.close();
-            } catch (Exception e) {
-                Log.e(LOG_TAG, "closeSafely() " + e.getMessage());
-            }
+            EasyUtils.closeSafely(pInputStream);
+            EasyUtils.closeSafely(outputStream);
         }
     }
 }

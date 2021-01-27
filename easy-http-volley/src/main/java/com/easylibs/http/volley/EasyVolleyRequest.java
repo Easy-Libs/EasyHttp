@@ -1,7 +1,5 @@
 package com.easylibs.http.volley;
 
-import android.util.Log;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
@@ -12,9 +10,7 @@ import com.easylibs.http.EasyHttp;
 import com.easylibs.http.EasyHttpRequest;
 import com.easylibs.http.EasyHttpResponse;
 import com.easylibs.utils.ContentType;
-import com.easylibs.utils.EasyUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 /**
@@ -94,19 +90,6 @@ class EasyVolleyRequest<T> extends Request<EasyHttpResponse<T>> {
 
     @Override
     public byte[] getBody() {
-        String requestBody = mEasyHttpRequest.getRequestBody();
-        if (requestBody == null) {
-            return null;
-        }
-        ContentType requestBodyContentType = mEasyHttpRequest.getRequestBodyContentType();
-        if (requestBodyContentType == null || EasyUtils.isBlank(requestBodyContentType.getCharset())) {
-            return requestBody.getBytes();
-        }
-        try {
-            return requestBody.getBytes(requestBodyContentType.getCharset());
-        } catch (UnsupportedEncodingException uee) {
-            Log.e(EasyHttp.LOG_TAG, "EasyVolleyRequest#getBody", uee);
-            return requestBody.getBytes();
-        }
+        return mEasyHttpRequest.getRequestBody();
     }
 }

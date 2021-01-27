@@ -3,9 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EasyHttpExample.iml" filepath="$PROJECT_DIR$/EasyHttpExample.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/easy-http/easy-http.iml" filepath="$PROJECT_DIR$/easy-http/easy-http.iml" />
-      <module fileurl="file://$PROJECT_DIR$/easy-http-volley/easy-http-volley.iml" filepath="$PROJECT_DIR$/easy-http-volley/easy-http-volley.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/app/EasyHttpExample.app.iml" filepath="$PROJECT_DIR$/.idea/modules/app/EasyHttpExample.app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/easy-http/EasyHttpExample.easy-http.iml" filepath="$PROJECT_DIR$/.idea/modules/easy-http/EasyHttpExample.easy-http.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/easy-http-volley/EasyHttpExample.easy-http-volley.iml" filepath="$PROJECT_DIR$/.idea/modules/easy-http-volley/EasyHttpExample.easy-http-volley.iml" />
     </modules>
   </component>
 </project>

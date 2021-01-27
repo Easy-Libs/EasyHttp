@@ -1,9 +1,11 @@
 package com.easylibs.http;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.easylibs.listener.EventListener;
 import com.easylibs.utils.ContentType;
+import com.easylibs.utils.EasyUtils;
 import com.easylibs.utils.JsonUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -11,9 +13,12 @@ import com.google.gson.JsonObject;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+
+import static com.easylibs.http.EasyHttp.LOG_TAG;
 
 /**
  * pojo class for data related to a service request which will be executed
@@ -29,7 +34,7 @@ public class EasyHttpRequest<T> {
     private String url;
     private HashMap<String, String> headers;
 
-    private String requestBody;
+    private byte[] requestBody;
     private ContentType requestBodyContentType;
 
     private ContentType responseContentType;
@@ -107,12 +112,35 @@ public class EasyHttpRequest<T> {
         setRequestBody(jsonString, ContentType.JSON);
     }
 
-    public void setRequestBody(String requestBody, ContentType requestBodyContentType) {
+    public void setRequestBody(String requestBodyStr, ContentType requestBodyContentType) {
+        if (EasyHttp.DEBUG) {
+            Log.d(LOG_TAG, "EasyHttpRequest#setRequestBody: " + requestBodyStr);
+        }
+        byte[] requestBody = null;
+        if (requestBodyStr != null) {
+            if (requestBodyContentType == null || EasyUtils.isBlank(requestBodyContentType.getCharset())) {
+                requestBody = requestBodyStr.getBytes();
+            } else {
+                try {
+                    requestBody = requestBodyStr.getBytes(requestBodyContentType.getCharset());
+                } catch (UnsupportedEncodingException uee) {
+                    Log.e(LOG_TAG, "EasyHttpRequest#setRequestBody", uee);
+                    requestBody = requestBodyStr.getBytes();
+                }
+            }
+        }
+        setRequestBody(requestBody, requestBodyContentType);
+    }
+
+    public void setRequestBody(byte[] requestBody, ContentType requestBodyContentType) {
+        if (EasyHttp.DEBUG) {
+            Log.d(LOG_TAG, "EasyHttpRequest#setRequestBody: " + (requestBodyContentType == null ? "null" : requestBodyContentType.toString()));
+        }
         this.requestBody = requestBody;
         this.requestBodyContentType = requestBodyContentType;
     }
 
-    public String getRequestBody() {
+    public byte[] getRequestBody() {
         return requestBody;
     }
 
